@@ -35,9 +35,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     localStorage.setItem('user', JSON.stringify(userData));
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('user');
+  const logout = async () => {
+    try {
+      // Call backend logout endpoint
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      // Clear local storage and state
+      setUser(null);
+      localStorage.removeItem('user');
+      
+      // Redirect to home page and refresh
+      window.location.href = '/';
+    }
   };
 
   return (

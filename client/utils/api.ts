@@ -89,5 +89,12 @@ export const api = {
         'Authorization': `Bearer ${token}` 
       },
       body: JSON.stringify(data)
+    }),
+
+  // Logout endpoint
+  logout: () =>
+    fetch(`${API_URL}/auth/logout`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
     })
 };

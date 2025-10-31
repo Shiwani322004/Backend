@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
+import LogoutButton from '../ui/LogoutButton';
 
 export default function Navbar() {
   const { isDark, toggleTheme } = useTheme();
@@ -37,12 +38,7 @@ export default function Navbar() {
                 >
                   Dashboard
                 </Link>
-                <button
-                  onClick={logout}
-                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm transition-colors"
-                >
-                  Logout
-                </button>
+                <LogoutButton className="text-sm" />
               </div>
             ) : (
               <div className="flex items-center space-x-2">

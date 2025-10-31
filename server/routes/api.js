@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { registerStudent, loginStudent, loginAdmin } = require('../controllers/authController');
+const { logout } = require('../controllers/logoutController');
 const {
   getAllStudents, getPendingStudents, updateStudentStatus, getStudentProfile,
   updateStudentProfile, addAttendance, addGrades, deleteStudent, getDashboardStats
@@ -11,6 +12,7 @@ const { protect, adminOnly } = require('../middleware/auth');
 router.post('/auth/register', registerStudent);
 router.post('/auth/login/student', loginStudent);
 router.post('/auth/login/admin', loginAdmin);
+router.post('/auth/logout', logout);
 
 // Student routes
 router.get('/students', protect, adminOnly, getAllStudents);
