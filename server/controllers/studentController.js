@@ -120,6 +120,59 @@ const getDashboardStats = async (req, res) => {
   }
 };
 
+// Update user preferences
+const updateUserPreferences = async (req, res) => {
+  try {
+    const { theme, notifications, language } = req.body;
+    const student = await Student.findByIdAndUpdate(
+      req.user.id,
+      { 
+        'preferences.theme': theme,
+        'preferences.notifications': notifications,
+        'preferences.language': language
+      },
+      { new: true }
+    ).select('preferences');
+    
+    res.json({ success: true, data: student.preferences });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get user preferences
+const getUserPreferences = async (req, res) => {
+  try {
+    const student = await Student.findById(req.user.id).select('preferences');
+    res.json({ success: true, ...student.preferences });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get student analytics
+const getStudentAnalytics = async (req, res) => {
+  try {
+    const student = await Student.findById(req.user.id);
+    
+    const analytics = {
+      attendancePercentage: student.calculateAttendancePercentage(),
+      gpa: student.calculateGPA(),
+      totalAssignments: student.assignments?.length || 0,
+      completedAssignments: student.assignments?.filter(a => a.status === 'submitted').length || 0,
+      pendingAssignments: student.assignments?.filter(a => a.status === 'pending').length || 0,
+      studyStreak: student.studyStats?.studyStreak || 0,
+      totalStudyHours: student.studyStats?.totalStudyHours || 0,
+      weeklyGoal: student.studyStats?.weeklyGoal || 20,
+      recentActivities: student.activities?.slice(-10) || []
+    };
+    
+    res.json({ success: true, data: analytics });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getAllStudents,
   getPendingStudents,
@@ -129,5 +182,8 @@ module.exports = {
   addAttendance,
   addGrades,
   deleteStudent,
-  getDashboardStats
+  getDashboardStats,
+  updateUserPreferences,
+  getUserPreferences,
+  getStudentAnalytics
 };

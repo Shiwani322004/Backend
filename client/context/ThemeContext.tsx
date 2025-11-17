@@ -1,36 +1,56 @@
 "use client";
 import { createContext, useContext, useEffect, useState } from 'react';
 
-const ThemeContext = createContext({
+interface ThemeContextType {
+  isDark: boolean;
+  toggleTheme: () => void;
+  isLoading: boolean;
+}
+
+const ThemeContext = createContext<ThemeContextType>({
   isDark: false,
-  toggleTheme: () => {}
+  toggleTheme: () => {},
+  isLoading: false
 });
 
 export const useTheme = () => useContext(ThemeContext);
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   const [isDark, setIsDark] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const saved = localStorage.getItem('theme');
-    if (saved) {
-      setIsDark(saved === 'dark');
-    }
+    initializeTheme();
   }, []);
 
+  const initializeTheme = async () => {
+    try {
+      const saved = localStorage.getItem('theme');
+      setIsDark(saved === 'dark');
+    } catch (error) {
+      setIsDark(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
+    if (isLoading) return;
+    
     if (isDark) {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
     localStorage.setItem('theme', isDark ? 'dark' : 'light');
-  }, [isDark]);
+  }, [isDark, isLoading]);
 
-  const toggleTheme = () => setIsDark(!isDark);
+  const toggleTheme = async () => {
+    setIsDark(!isDark);
+  };
 
   return (
-    <ThemeContext.Provider value={{ isDark, toggleTheme }}>
+    <ThemeContext.Provider value={{ isDark, toggleTheme, isLoading }}>
       {children}
     </ThemeContext.Provider>
   );

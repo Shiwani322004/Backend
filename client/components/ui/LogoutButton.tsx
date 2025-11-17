@@ -1,46 +1,33 @@
 "use client";
+import { LogOut } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { api } from '../../utils/api';
+import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import Button from './Button';
 
-interface LogoutButtonProps {
-  className?: string;
-  children?: React.ReactNode;
-}
-
-export default function LogoutButton({ className = "", children = "Logout" }: LogoutButtonProps) {
+export default function LogoutButton() {
   const { logout } = useAuth();
+  const router = useRouter();
 
   const handleLogout = async () => {
     try {
-      // Show loading toast
-      const loadingToast = toast.loading('Logging out...');
-      
-      // Call logout API
-      await api.logout();
-      
-      // Dismiss loading toast
-      toast.dismiss(loadingToast);
-      
-      // Show success message
-      toast.success('Logged out successfully!');
-      
-      // Call context logout (which handles redirect)
       await logout();
-      
+      toast.success('Logged out successfully');
+      router.push('/');
     } catch (error) {
-      toast.error('Logout failed. Redirecting anyway...');
-      // Force logout even if API call fails
-      await logout();
+      toast.error('Logout failed');
     }
   };
 
   return (
-    <button
+    <Button
       onClick={handleLogout}
-      className={`bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors ${className}`}
+      variant="destructive"
+      size="sm"
+      className="w-full justify-start"
     >
-      {children}
-    </button>
+      <LogOut className="w-4 h-4 mr-2" />
+      Logout
+    </Button>
   );
 }

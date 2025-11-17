@@ -4,7 +4,8 @@ const { registerStudent, loginStudent, loginAdmin } = require('../controllers/au
 const { logout } = require('../controllers/logoutController');
 const {
   getAllStudents, getPendingStudents, updateStudentStatus, getStudentProfile,
-  updateStudentProfile, addAttendance, addGrades, deleteStudent, getDashboardStats
+  updateStudentProfile, addAttendance, addGrades, deleteStudent, getDashboardStats,
+  updateUserPreferences, getUserPreferences, getStudentAnalytics
 } = require('../controllers/studentController');
 const { protect, adminOnly } = require('../middleware/auth');
 
@@ -25,6 +26,13 @@ router.post('/students/grades', protect, adminOnly, addGrades);
 // Student profile routes
 router.get('/profile', protect, getStudentProfile);
 router.put('/profile', protect, updateStudentProfile);
+
+// User preferences routes
+router.get('/user/preferences', protect, getUserPreferences);
+router.put('/user/preferences', protect, updateUserPreferences);
+
+// Analytics routes
+router.get('/student/analytics', protect, getStudentAnalytics);
 
 // Dashboard routes
 router.get('/dashboard/stats', protect, adminOnly, getDashboardStats);

@@ -1,8 +1,16 @@
 "use client";
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { GraduationCap, TrendingUp, Calendar, BookOpen, Target, Clock } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import { api } from '../../../utils/api';
 import Navbar from '../../../components/layout/Navbar';
+import StatsCard from '../../../components/dashboard/StatsCard';
+import AttendanceChart from '../../../components/dashboard/AttendanceChart';
+import GradeProgress from '../../../components/dashboard/GradeProgress';
+import AssignmentTracker from '../../../components/dashboard/AssignmentTracker';
+import QuickActions from '../../../components/dashboard/QuickActions';
+import { Card, CardHeader, CardTitle, CardContent } from '../../../components/ui/Card';
 import toast from 'react-hot-toast';
 
 interface StudentProfile {
@@ -67,228 +75,205 @@ export default function StudentDashboard() {
     return Math.round((presentDays / profile.attendance.length) * 100);
   };
 
-  const calculateAverageGrade = () => {
-    if (!profile?.grades?.length) return 'N/A';
-    const totalPercentage = profile.grades.reduce((sum, grade) => {
-      return sum + (grade.marks / grade.totalMarks) * 100;
-    }, 0);
-    const average = totalPercentage / profile.grades.length;
-    
-    if (average >= 90) return 'A+';
-    if (average >= 80) return 'A';
-    if (average >= 70) return 'B+';
-    if (average >= 60) return 'B';
-    if (average >= 50) return 'C';
-    return 'D';
+  const calculateGPA = () => {
+    if (!profile?.grades?.length) return '0.0';
+    const gradePoints = { 'A+': 4.0, 'A': 3.7, 'B+': 3.3, 'B': 3.0, 'C+': 2.7, 'C': 2.3, 'D': 2.0, 'F': 0 };
+    const total = profile.grades.reduce((sum, grade) => sum + (gradePoints[grade.grade as keyof typeof gradePoints] || 0), 0);
+    return (total / profile.grades.length).toFixed(1);
   };
+
+  const getAttendanceChartData = () => {
+    if (!profile?.attendance?.length) return [];
+    return profile.attendance.slice(-7).map(record => ({
+      date: new Date(record.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      attendance: record.status === 'present' ? 100 : record.status === 'late' ? 50 : 0
+    }));
+  };
+
+  const mockAssignments = [
+    {
+      id: '1',
+      title: 'Mathematics Assignment',
+      subject: 'Mathematics',
+      dueDate: '2024-01-20',
+      status: 'pending' as const,
+      priority: 'high' as const
+    },
+    {
+      id: '2',
+      title: 'Physics Lab Report',
+      subject: 'Physics',
+      dueDate: '2024-01-25',
+      status: 'pending' as const,
+      priority: 'medium' as const
+    }
+  ];
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
         <Navbar />
         <div className="flex items-center justify-center py-20">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <motion.div 
+            className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
       <Navbar />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Welcome back, {profile?.fullname}!
+        {/* Welcome Header */}
+        <motion.div 
+          className="mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+            Welcome back, {profile?.fullname}! 👋
           </h1>
-          <p className="text-gray-600 dark:text-gray-300">
+          <p className="text-gray-600 dark:text-gray-300 text-lg">
             Here's your academic overview and recent updates.
           </p>
-        </div>
+        </motion.div>
 
-        {/* Profile Overview */}
+        {/* Stats Cards */}
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
+          <StatsCard
+            title="Attendance Rate"
+            value={`${calculateAttendancePercentage()}%`}
+            change="+2% from last week"
+            changeType="positive"
+            icon={Calendar}
+            gradient="from-green-500 to-emerald-600"
+          />
+          <StatsCard
+            title="Current GPA"
+            value={calculateGPA()}
+            change="+0.2 from last semester"
+            changeType="positive"
+            icon={GraduationCap}
+            gradient="from-blue-500 to-blue-600"
+          />
+          <StatsCard
+            title="Assignments Due"
+            value={mockAssignments.filter(a => a.status === 'pending').length}
+            change="2 due this week"
+            changeType="neutral"
+            icon={BookOpen}
+            gradient="from-orange-500 to-red-600"
+          />
+          <StatsCard
+            title="Study Streak"
+            value="7 days"
+            change="Personal best!"
+            changeType="positive"
+            icon={Target}
+            gradient="from-purple-500 to-pink-600"
+          />
+        </motion.div>
+
+        {/* Main Dashboard Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <div className="lg:col-span-2">
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-slate-700">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-                Profile Information
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">
-                    Full Name
-                  </label>
-                  <p className="text-gray-900 dark:text-white font-medium">
-                    {profile?.fullname}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">
-                    Email
-                  </label>
-                  <p className="text-gray-900 dark:text-white font-medium">
-                    {profile?.email}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">
-                    Roll Number
-                  </label>
-                  <p className="text-gray-900 dark:text-white font-medium">
-                    {profile?.rollNumber}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">
-                    Class
-                  </label>
-                  <p className="text-gray-900 dark:text-white font-medium">
-                    {profile?.class}
-                  </p>
-                </div>
-                {profile?.phone && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">
-                      Phone
-                    </label>
-                    <p className="text-gray-900 dark:text-white font-medium">
-                      {profile.phone}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
+          {/* Left Column */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Attendance Chart */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <AttendanceChart data={getAttendanceChartData()} />
+            </motion.div>
+
+            {/* Grade Progress */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
+              <GradeProgress grades={profile?.grades || []} />
+            </motion.div>
           </div>
 
+          {/* Right Column */}
           <div className="space-y-6">
-            {/* Quick Stats */}
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-slate-700">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-                Quick Stats
-              </h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Attendance</span>
-                  <span className="text-2xl font-bold text-blue-600">
-                    {calculateAttendancePercentage()}%
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Average Grade</span>
-                  <span className="text-2xl font-bold text-green-600">
-                    {calculateAverageGrade()}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Total Subjects</span>
-                  <span className="text-2xl font-bold text-purple-600">
-                    {profile?.grades?.length || 0}
-                  </span>
-                </div>
-              </div>
-            </div>
+            {/* Assignment Tracker */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <AssignmentTracker assignments={mockAssignments} />
+            </motion.div>
+
+            {/* Recent Notifications */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    🔔 Recent Notifications
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {profile?.notifications?.length ? (
+                    <div className="space-y-3 max-h-64 overflow-y-auto">
+                      {profile.notifications.slice(0, 3).map((notification, index) => (
+                        <motion.div
+                          key={index}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg"
+                        >
+                          <h4 className="font-medium text-gray-900 dark:text-white text-sm">
+                            {notification.title}
+                          </h4>
+                          <p className="text-gray-600 dark:text-gray-300 text-xs mt-1">
+                            {notification.message}
+                          </p>
+                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                            {new Date(notification.createdAt).toLocaleDateString()}
+                          </span>
+                        </motion.div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                      <div className="text-4xl mb-2">🔔</div>
+                      <p>No notifications yet</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
           </div>
         </div>
 
-        {/* Academic Performance */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Attendance */}
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-slate-700">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-              Recent Attendance
-            </h3>
-            {profile?.attendance?.length ? (
-              <div className="space-y-3">
-                {profile.attendance.slice(-5).reverse().map((record, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-700 rounded-lg">
-                    <span className="text-gray-900 dark:text-white">
-                      {new Date(record.date).toLocaleDateString()}
-                    </span>
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      record.status === 'present' 
-                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                        : record.status === 'late'
-                        ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                        : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                    }`}>
-                      {record.status.charAt(0).toUpperCase() + record.status.slice(1)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-gray-500 dark:text-gray-400 text-center py-8">
-                No attendance records yet
-              </p>
-            )}
-          </div>
-
-          {/* Grades */}
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-slate-700">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-              Recent Grades
-            </h3>
-            {profile?.grades?.length ? (
-              <div className="space-y-3">
-                {profile.grades.slice(-5).reverse().map((grade, index) => (
-                  <div key={index} className="p-3 bg-gray-50 dark:bg-slate-700 rounded-lg">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-medium text-gray-900 dark:text-white">
-                        {grade.subject}
-                      </span>
-                      <span className="text-lg font-bold text-blue-600">
-                        {grade.grade}
-                      </span>
-                    </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
-                      {grade.marks}/{grade.totalMarks} ({Math.round((grade.marks/grade.totalMarks)*100)}%)
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-gray-500 dark:text-gray-400 text-center py-8">
-                No grades recorded yet
-              </p>
-            )}
-          </div>
-        </div>
-
-        {/* Notifications */}
-        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-slate-700">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-            Notifications
-          </h3>
-          {profile?.notifications?.length ? (
-            <div className="space-y-3">
-              {profile.notifications.slice(0, 5).map((notification, index) => (
-                <div key={index} className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gray-900 dark:text-white">
-                        {notification.title}
-                      </h4>
-                      <p className="text-gray-600 dark:text-gray-300 mt-1">
-                        {notification.message}
-                      </p>
-                    </div>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
-                      {new Date(notification.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <div className="text-4xl mb-2">🔔</div>
-              <p className="text-gray-500 dark:text-gray-400">
-                No notifications yet
-              </p>
-            </div>
-          )}
-        </div>
+        {/* Quick Actions */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+        >
+          <QuickActions />
+        </motion.div>
       </div>
     </div>
   );
