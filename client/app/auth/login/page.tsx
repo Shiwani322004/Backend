@@ -3,9 +3,14 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import { motion } from 'framer-motion';
 import { useAuth } from '../../../context/AuthContext';
 import { api } from '../../../utils/api';
 import Navbar from '../../../components/layout/Navbar';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { GraduationCap, ShieldCheck } from 'lucide-react';
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -23,118 +28,127 @@ export default function LoginPage() {
         ? await api.loginAdmin(formData)
         : await api.loginStudent(formData);
       
-      const data = await response.json();
+      // api.ts returns the parsed JSON directly if successful, or throws
+      // But wait, api.ts request method returns `await response.json()`.
+      // So `response` is the data.
+      // Let's check api.ts again. Yes, it returns `response.json()`.
+      
+      // However, the original code was:
+      // const response = ...
+      // const data = await response.json();
+      // if (response.ok) ...
+      
+      // My new api.ts throws on error. So if we are here, it's success.
+      const data = response;
+      
+      login(data);
+      toast.success(`Welcome back, ${data.fullname || 'Admin'}!`);
+      router.push(userType === 'admin' ? '/admin/dashboard' : '/student/dashboard');
 
-      if (response.ok) {
-        login(data);
-        toast.success(`Welcome back, ${data.fullname}!`);
-        router.push(userType === 'admin' ? '/admin/dashboard' : '/student/dashboard');
-      } else {
-        toast.error(data.message || 'Login failed');
-      }
-    } catch (error) {
-      toast.error('Network error. Please try again.');
+    } catch (error: any) {
+      console.error("Login error:", error);
+      toast.error(error.message || 'Login failed');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-900 dark:to-slate-800 flex flex-col">
       <Navbar />
       
-      <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-8">
-            <div className="text-center">
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                Sign In
-              </h2>
-              <p className="text-gray-600 dark:text-gray-300">
-                Access your account
-              </p>
-            </div>
-
-            {/* User Type Toggle */}
-            <div className="mt-6">
-              <div className="flex bg-gray-100 dark:bg-slate-700 rounded-lg p-1">
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-md"
+        >
+          <Card className="border-none shadow-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl">
+            <CardHeader className="space-y-1 text-center">
+              <motion.div 
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="mx-auto bg-blue-100 dark:bg-blue-900/30 p-3 rounded-full w-fit mb-4"
+              >
+                {userType === 'student' ? (
+                  <GraduationCap className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                ) : (
+                  <ShieldCheck className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                )}
+              </motion.div>
+              <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">
+                Welcome Back
+              </CardTitle>
+              <CardDescription>
+                Sign in to your {userType} account
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex p-1 bg-gray-100 dark:bg-slate-700 rounded-xl mb-6">
                 <button
-                  type="button"
                   onClick={() => setUserType('student')}
-                  className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                  className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
                     userType === 'student'
-                      ? 'bg-blue-600 text-white shadow-sm'
-                      : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                      ? 'bg-white dark:bg-slate-600 text-blue-600 dark:text-blue-400 shadow-sm'
+                      : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
                   }`}
                 >
                   Student
                 </button>
                 <button
-                  type="button"
                   onClick={() => setUserType('admin')}
-                  className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                  className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
                     userType === 'admin'
-                      ? 'bg-blue-600 text-white shadow-sm'
-                      : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                      ? 'bg-white dark:bg-slate-600 text-blue-600 dark:text-blue-400 shadow-sm'
+                      : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
                   }`}
                 >
                   Admin
                 </button>
               </div>
-            </div>
 
-            <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-                    placeholder="Enter your email"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Password
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    value={formData.password}
-                    onChange={(e) => setFormData({...formData, password: e.target.value})}
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-                    placeholder="Enter your password"
-                  />
-                </div>
-              </div>
-
-              
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-              >
-                {loading ? 'Signing In...' : 'Sign In'}
-              </button>
-            </form>
-
-            <div className="mt-6 text-center">
-              <p className="text-gray-600 dark:text-gray-300">
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <Input
+                  label="Email Address"
+                  type="email"
+                  placeholder="Enter your email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  required
+                  className="bg-white/50 dark:bg-slate-900/50"
+                />
+                <Input
+                  label="Password"
+                  type="password"
+                  placeholder="Enter your password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({...formData, password: e.target.value})}
+                  required
+                  className="bg-white/50 dark:bg-slate-900/50"
+                />
+                
+                <Button 
+                  type="submit" 
+                  className="w-full" 
+                  size="lg"
+                  isLoading={loading}
+                >
+                  Sign In
+                </Button>
+              </form>
+            </CardContent>
+            <CardFooter className="justify-center">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 Don't have an account?{' '}
-                <Link href="/auth/register" className="text-blue-600 hover:text-blue-500 font-medium">
+                <Link href="/auth/register" className="text-blue-600 hover:text-blue-500 font-medium hover:underline">
                   Register here
                 </Link>
               </p>
-            </div>
-          </div>
-        </div>
+            </CardFooter>
+          </Card>
+        </motion.div>
       </div>
     </div>
   );

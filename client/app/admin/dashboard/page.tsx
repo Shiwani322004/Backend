@@ -1,220 +1,135 @@
 "use client";
-import { useState, useEffect } from 'react';
-import { useAuth } from '../../../context/AuthContext';
-import { api } from '../../../utils/api';
-import Navbar from '../../../components/layout/Navbar';
-import AdminSidebar from '../../../components/layout/AdminSidebar';
-import toast from 'react-hot-toast';
-
-interface DashboardStats {
-  totalStudents: number;
-  pendingApprovals: number;
-  activeStudents: number;
-}
+import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import { Users, UserCheck, UserX, Clock } from 'lucide-react';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { api } from '@/utils/api';
+import { useAuth } from '@/context/AuthContext';
 
 export default function AdminDashboard() {
   const { user } = useAuth();
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalStudents: 0,
+    activeStudents: 0,
+    pendingStudents: 0,
+    averageAttendance: 0
+  });
 
   useEffect(() => {
-    fetchStats();
-  }, []);
-
-  const fetchStats = async () => {
-    if (!user?.token) return;
-    
-    try {
-      const response = await api.getDashboardStats(user.token);
-      const data = await response.json();
-      
-      if (response.ok) {
-        setStats(data.data);
-      } else {
-        toast.error('Failed to fetch dashboard stats');
+    const fetchStats = async () => {
+      try {
+        if (user?.token) {
+           const response = await api.getDashboardStats(user.token);
+           if (response && !response.error) {
+             setStats(response);
+           }
+        }
+      } catch (error) {
+        console.error("Failed to fetch stats", error);
       }
-    } catch (error) {
-      toast.error('Network error');
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
-        <Navbar />
-        <div className="flex">
-          <AdminSidebar />
-          <div className="flex-1 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+    fetchStats();
+  }, [user]);
+
+  const statCards = [
+    {
+      title: "Total Students",
+      value: stats.totalStudents,
+      icon: Users,
+      color: "text-blue-600",
+      bg: "bg-blue-100 dark:bg-blue-900/20"
+    },
+    {
+      title: "Active Students",
+      value: stats.activeStudents,
+      icon: UserCheck,
+      color: "text-green-600",
+      bg: "bg-green-100 dark:bg-green-900/20"
+    },
+    {
+      title: "Pending Approvals",
+      value: stats.pendingStudents,
+      icon: Clock,
+      color: "text-yellow-600",
+      bg: "bg-yellow-100 dark:bg-yellow-900/20"
+    },
+    {
+      title: "Avg. Attendance",
+      value: `${stats.averageAttendance}%`,
+      icon: UserX,
+      color: "text-purple-600",
+      bg: "bg-purple-100 dark:bg-purple-900/20"
+    }
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
-      <Navbar />
-      
-      <div className="flex">
-        <AdminSidebar />
-        
-        <div className="flex-1 p-8">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Admin Dashboard
-            </h1>
-            <p className="text-gray-600 dark:text-gray-300">
-              Welcome back, {user?.fullname}! Here's your overview.
-            </p>
-          </div>
+    <DashboardLayout userType="admin">
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            Admin Dashboard
+          </h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-2">
+            Welcome back, {user?.fullname || 'Admin'}
+          </p>
+        </div>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-slate-700">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                    Total Students
-                  </p>
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                    {stats?.totalStudents || 0}
-                  </p>
-                </div>
-                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
-                  <span className="text-2xl">👥</span>
-                </div>
-              </div>
-              <div className="mt-4">
-                <span className="text-sm text-green-600 dark:text-green-400">
-                  ↗ Active students in system
-                </span>
-              </div>
-            </div>
-
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-slate-700">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                    Pending Approvals
-                  </p>
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                    {stats?.pendingApprovals || 0}
-                  </p>
-                </div>
-                <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900 rounded-lg flex items-center justify-center">
-                  <span className="text-2xl">⏳</span>
-                </div>
-              </div>
-              <div className="mt-4">
-                <span className="text-sm text-yellow-600 dark:text-yellow-400">
-                  ↗ Awaiting your review
-                </span>
-              </div>
-            </div>
-
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-slate-700">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                    Active Students
-                  </p>
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                    {stats?.activeStudents || 0}
-                  </p>
-                </div>
-                <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
-                  <span className="text-2xl">✅</span>
-                </div>
-              </div>
-              <div className="mt-4">
-                <span className="text-sm text-green-600 dark:text-green-400">
-                  ↗ Currently enrolled
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-slate-700">
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-                Quick Actions
-              </h3>
-              <div className="space-y-3">
-                <a
-                  href="/admin/pending"
-                  className="flex items-center justify-between p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg hover:bg-yellow-100 dark:hover:bg-yellow-900/30 transition-colors"
-                >
-                  <div className="flex items-center space-x-3">
-                    <span className="text-2xl">⏳</span>
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">
-                        Review Pending Students
-                      </p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {stats?.pendingApprovals || 0} students waiting
-                      </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {statCards.map((stat, index) => {
+            const Icon = stat.icon;
+            return (
+              <motion.div
+                key={stat.title}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Card className="border-none shadow-lg">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          {stat.title}
+                        </p>
+                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mt-2">
+                          {stat.value}
+                        </h3>
+                      </div>
+                      <div className={`p-3 rounded-full ${stat.bg}`}>
+                        <Icon className={`w-6 h-6 ${stat.color}`} />
+                      </div>
                     </div>
-                  </div>
-                  <span className="text-yellow-600 dark:text-yellow-400">→</span>
-                </a>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            );
+          })}
+        </div>
 
-                <a
-                  href="/admin/students"
-                  className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
-                >
-                  <div className="flex items-center space-x-3">
-                    <span className="text-2xl">👥</span>
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">
-                        Manage All Students
-                      </p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        View and edit student records
-                      </p>
-                    </div>
-                  </div>
-                  <span className="text-blue-600 dark:text-blue-400">→</span>
-                </a>
-              </div>
-            </div>
-
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-slate-700">
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-                Recent Activity
-              </h3>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Quick Actions</CardTitle>
+            </CardHeader>
+            <CardContent>
               <div className="space-y-4">
-                <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-slate-700 rounded-lg">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      System initialized
-                    </p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                      Admin dashboard ready
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-slate-700 rounded-lg">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      Database connected
-                    </p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                      All systems operational
-                    </p>
-                  </div>
-                </div>
+                <p className="text-gray-500">Manage students, attendance, and more.</p>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Registrations</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-500">List of recently registered students...</p>
+            </CardContent>
+          </Card>
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 }

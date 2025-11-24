@@ -3,7 +3,7 @@ import { LogOut } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
-import Button from './Button';
+import { Button } from './button';
 
 export default function LogoutButton() {
   const { logout } = useAuth();
@@ -22,7 +22,7 @@ export default function LogoutButton() {
   return (
     <Button
       onClick={handleLogout}
-      variant="destructive"
+      variant="danger"
       size="sm"
       className="w-full justify-start"
     >
