@@ -21,6 +21,11 @@ class ApiClient {
         throw new Error(errorData.message || `HTTP ${response.status}`);
       }
 
+      // Handle empty responses (like 204 No Content)
+      if (response.status === 204) {
+        return null;
+      }
+
       return await response.json();
     } catch (error) {
       console.error(`API Error (${endpoint}):`, error);
@@ -60,49 +65,9 @@ class ApiClient {
     });
   }
 
-  // Student endpoints
-  async getProfile(token: string) {
-    return this.request('/profile', {
-      headers: this.getAuthHeaders(token)
-    });
-  }
-
-  async updateProfile(data: any, token: string) {
-    return this.request('/profile', {
-      method: 'PUT',
-      headers: this.getAuthHeaders(token),
-      body: JSON.stringify(data)
-    });
-  }
-
-  async getStudentDashboard(token: string) {
-    return this.request('/student/dashboard', {
-      headers: this.getAuthHeaders(token)
-    });
-  }
-
-  async getStudentAttendance(token: string, period?: string) {
-    const query = period ? `?period=${period}` : '';
-    return this.request(`/student/attendance${query}`, {
-      headers: this.getAuthHeaders(token)
-    });
-  }
-
-  async getStudentGrades(token: string, semester?: string) {
-    const query = semester ? `?semester=${semester}` : '';
-    return this.request(`/student/grades${query}`, {
-      headers: this.getAuthHeaders(token)
-    });
-  }
-
-  // Admin endpoints
-  async getAllStudents(token: string, page = 1, limit = 10, search?: string) {
-    const params = new URLSearchParams({
-      page: page.toString(),
-      limit: limit.toString(),
-      ...(search && { search })
-    });
-    return this.request(`/students?${params}`, {
+  // Student endpoints (Admin only)
+  async getAllStudents(token: string) {
+    return this.request('/students', {
       headers: this.getAuthHeaders(token)
     });
   }
@@ -128,12 +93,6 @@ class ApiClient {
     });
   }
 
-  async getDashboardStats(token: string) {
-    return this.request('/dashboard/stats', {
-      headers: this.getAuthHeaders(token)
-    });
-  }
-
   async addAttendance(data: any, token: string) {
     return this.request('/students/attendance', {
       method: 'POST',
@@ -150,62 +109,47 @@ class ApiClient {
     });
   }
 
-  async bulkUpdateAttendance(data: any[], token: string) {
-    return this.request('/students/attendance/bulk', {
-      method: 'POST',
-      headers: this.getAuthHeaders(token),
-      body: JSON.stringify({ records: data })
-    });
-  }
-
-  // Notifications
-  async getNotifications(token: string, unreadOnly = false) {
-    const query = unreadOnly ? '?unread=true' : '';
-    return this.request(`/notifications${query}`, {
+  // Student Profile endpoints
+  async getProfile(token: string) {
+    return this.request('/profile', {
       headers: this.getAuthHeaders(token)
     });
   }
 
-  async markNotificationRead(id: string, token: string) {
-    return this.request(`/notifications/${id}/read`, {
+  async updateProfile(data: any, token: string) {
+    return this.request('/profile', {
       method: 'PUT',
+      headers: this.getAuthHeaders(token),
+      body: JSON.stringify(data)
+    });
+  }
+
+  // User Preferences
+  async getUserPreferences(token: string) {
+    return this.request('/user/preferences', {
       headers: this.getAuthHeaders(token)
     });
   }
 
-  async sendAnnouncement(data: any, token: string) {
-    return this.request('/announcements', {
-      method: 'POST',
+  async updateUserPreferences(data: any, token: string) {
+    return this.request('/user/preferences', {
+      method: 'PUT',
       headers: this.getAuthHeaders(token),
       body: JSON.stringify(data)
     });
   }
 
   // Analytics
-  async getAnalytics(token: string, type: string, period = '30d') {
-    return this.request(`/analytics/${type}?period=${period}`, {
+  async getStudentAnalytics(token: string) {
+    return this.request('/student/analytics', {
       headers: this.getAuthHeaders(token)
     });
   }
 
-  async exportData(token: string, type: string, format = 'csv') {
-    return this.request(`/export/${type}?format=${format}`, {
+  // Dashboard endpoints (Admin only)
+  async getDashboardStats(token: string) {
+    return this.request('/dashboard/stats', {
       headers: this.getAuthHeaders(token)
-    });
-  }
-
-  // Settings
-  async getSettings(token: string) {
-    return this.request('/settings', {
-      headers: this.getAuthHeaders(token)
-    });
-  }
-
-  async updateSettings(data: any, token: string) {
-    return this.request('/settings', {
-      method: 'PUT',
-      headers: this.getAuthHeaders(token),
-      body: JSON.stringify(data)
     });
   }
 }
@@ -213,31 +157,16 @@ class ApiClient {
 // Export singleton instance
 export const api = new ApiClient();
 
-// Legacy compatibility
-export const legacyApi = {
-  registerStudent: (data: any) => api.registerStudent(data),
-  loginStudent: (data: any) => api.loginStudent(data),
-  loginAdmin: (data: any) => api.loginAdmin(data),
-  getProfile: (token: string) => api.getProfile(token),
-  updateProfile: (data: any, token: string) => api.updateProfile(data, token),
-  getAllStudents: (token: string) => api.getAllStudents(token),
-  getPendingStudents: (token: string) => api.getPendingStudents(token),
-  updateStudentStatus: (id: string, status: string, token: string) => api.updateStudentStatus(id, status, token),
-  deleteStudent: (id: string, token: string) => api.deleteStudent(id, token),
-  getDashboardStats: (token: string) => api.getDashboardStats(token),
-  addAttendance: (data: any, token: string) => api.addAttendance(data, token),
-  addGrades: (data: any, token: string) => api.addGrades(data, token),
-  logout: () => api.logout()
-};
-
 // Types for better TypeScript support
 export interface Student {
-  id: string;
+  _id: string;
   fullname: string;
   email: string;
   phone?: string;
   address?: string;
   dateOfBirth?: string;
+  rollNumber?: string;
+  class?: string;
   status: 'pending' | 'approved' | 'rejected';
   createdAt: string;
   updatedAt: string;
@@ -251,29 +180,18 @@ export interface DashboardStats {
   recentActivity: any[];
 }
 
-export interface AttendanceRecord {
-  id: string;
-  studentId: string;
-  date: string;
-  status: 'present' | 'absent' | 'late';
-  subject?: string;
-}
-
-export interface Grade {
-  id: string;
-  studentId: string;
-  subject: string;
-  grade: number;
-  maxGrade: number;
-  semester: string;
-  createdAt: string;
-}
-
-export interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  type: 'info' | 'success' | 'warning' | 'error';
-  read: boolean;
-  createdAt: string;
+export interface AnalyticsData {
+  attendance: {
+    total: number;
+    present: number;
+    absent: number;
+    percentage: number;
+  };
+  grades: {
+    average: number;
+    subjects: {
+      subject: string;
+      grade: number;
+    }[];
+  };
 }

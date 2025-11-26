@@ -28,14 +28,16 @@ export default function StudentDashboard() {
     const fetchStudentData = async () => {
       try {
         if (user?.token) {
-          // For now, we'll use mock data since the backend endpoints might not be fully implemented
-          // In a real scenario, you'd call api.getStudentAnalytics(user.token)
-          setStats({
-            totalAttendance: 85,
-            averageGrade: 87.5,
-            totalSubjects: 6,
-            upcomingAssignments: 3
-          });
+          const analytics = await api.getStudentAnalytics(user.token);
+          
+          if (analytics) {
+            setStats({
+              totalAttendance: analytics.attendance?.percentage || 0,
+              averageGrade: analytics.grades?.average || 0,
+              totalSubjects: analytics.grades?.subjects?.length || 0,
+              upcomingAssignments: 0 // Backend doesn't seem to have assignments yet
+            });
+          }
         }
       } catch (error) {
         console.error('Failed to fetch student data:', error);

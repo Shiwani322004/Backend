@@ -12,7 +12,7 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState({
     totalStudents: 0,
     activeStudents: 0,
-    pendingStudents: 0,
+    pendingApprovals: 0,
     averageAttendance: 0
   });
 
@@ -21,7 +21,7 @@ export default function AdminDashboard() {
       try {
         if (user?.token) {
            const response = await api.getDashboardStats(user.token);
-           if (response && !response.error) {
+           if (response) {
              setStats(response);
            }
         }
@@ -50,7 +50,7 @@ export default function AdminDashboard() {
     },
     {
       title: "Pending Approvals",
-      value: stats.pendingStudents,
+      value: stats.pendingApprovals,
       icon: Clock,
       color: "text-yellow-600",
       bg: "bg-yellow-100 dark:bg-yellow-900/20"
