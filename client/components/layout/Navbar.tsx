@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { User, Settings, GraduationCap, LogOut } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import ThemeToggle from '../ui/ThemeToggle';
+import ThemeToggle from '../ui/themetoggle';
 import { api } from '@/utils/api';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';

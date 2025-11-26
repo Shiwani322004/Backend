@@ -6,9 +6,9 @@ import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import { api } from '../../../utils/api';
 import Navbar from '../../../components/layout/Navbar';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/Card';
 import { UserPlus } from 'lucide-react';
 
 export default function RegisterPage() {

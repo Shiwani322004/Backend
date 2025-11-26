@@ -7,9 +7,9 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../../../context/AuthContext';
 import { api } from '../../../utils/api';
 import Navbar from '../../../components/layout/Navbar';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/Card';
 import { GraduationCap, ShieldCheck } from 'lucide-react';
 
 export default function LoginPage() {
