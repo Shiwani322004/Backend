@@ -6,6 +6,7 @@ class ApiClient {
     const url = `${API_URL}${endpoint}`;
     
     const config: RequestInit = {
+      cache: 'no-store', // Disable caching to ensure fresh data
       headers: {
         'Content-Type': 'application/json',
         ...options.headers,
