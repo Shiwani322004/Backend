@@ -1,327 +1,317 @@
 "use client";
-import { useState, useEffect } from 'react';
-import { useAuth } from '../../../context/AuthContext';
-import { api } from '../../../utils/api';
-import Navbar from '../../../components/layout/Navbar';
+import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import { User, Mail, Phone, Calendar, GraduationCap, Edit2, Save, X } from 'lucide-react';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/input';
+import { api } from '@/utils/api';
+import { useAuth } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
 
 interface StudentProfile {
   _id: string;
   fullname: string;
   email: string;
+  phone?: string;
   rollNumber: string;
   class: string;
-  phone?: string;
-  address?: string;
+  status: string;
+  createdAt: string;
   dateOfBirth?: string;
+  address?: string;
 }
 
 export default function StudentProfile() {
   const { user } = useAuth();
   const [profile, setProfile] = useState<StudentProfile | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState(false);
-  const [formData, setFormData] = useState({
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({
     fullname: '',
     phone: '',
-    address: '',
-    dateOfBirth: ''
+    dateOfBirth: '',
+    address: ''
   });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     fetchProfile();
-  }, []);
+  }, [user]);
 
   const fetchProfile = async () => {
-    if (!user?.token) return;
-    
     try {
-      const response = await api.getProfile(user.token);
-      const data = await response.json();
-      
-      if (response.ok) {
-        setProfile(data.data);
-        setFormData({
-          fullname: data.data.fullname || '',
-          phone: data.data.phone || '',
-          address: data.data.address || '',
-          dateOfBirth: data.data.dateOfBirth ? data.data.dateOfBirth.split('T')[0] : ''
+      if (user?.token) {
+        const response = await api.getProfile(user.token);
+        setProfile(response.student || response);
+        setEditForm({
+          fullname: response.student?.fullname || response.fullname || '',
+          phone: response.student?.phone || response.phone || '',
+          dateOfBirth: response.student?.dateOfBirth || response.dateOfBirth || '',
+          address: response.student?.address || response.address || ''
         });
-      } else {
-        toast.error('Failed to fetch profile');
       }
     } catch (error) {
-      toast.error('Network error');
+      console.error('Failed to fetch profile:', error);
+      toast.error('Failed to load profile');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleUpdateProfile = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user?.token) return;
-    
+  const handleSave = async () => {
+    setSaving(true);
     try {
-      const response = await api.updateProfile(formData, user.token);
-      const data = await response.json();
-      
-      if (response.ok) {
-        setProfile(data.data);
-        setEditing(false);
-        toast.success('Profile updated successfully');
-      } else {
-        toast.error('Failed to update profile');
+      if (user?.token) {
+        await api.updateProfile(editForm, user.token);
+        toast.success('Profile updated successfully!');
+        setIsEditing(false);
+        fetchProfile(); // Refresh profile data
       }
-    } catch (error) {
-      toast.error('Network error');
+    } catch (error: any) {
+      console.error('Failed to update profile:', error);
+      toast.error(error.message || 'Failed to update profile');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    if (profile) {
+      setEditForm({
+        fullname: profile.fullname || '',
+        phone: profile.phone || '',
+        dateOfBirth: profile.dateOfBirth || '',
+        address: profile.address || ''
+      });
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
-        <Navbar />
-        <div className="flex items-center justify-center py-20">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <DashboardLayout userType="student">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
         </div>
-      </div>
+      </DashboardLayout>
     );
   }
 
+  if (!profile) {
+    return (
+      <DashboardLayout userType="student">
+        <div className="text-center py-8">
+          <p className="text-gray-500 dark:text-gray-400">Profile not found</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'approved':
+        return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400';
+      case 'rejected':
+        return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
-      <Navbar />
-      
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            My Profile
-          </h1>
-          <p className="text-gray-600 dark:text-gray-300">
-            Manage your personal information and account settings
-          </p>
+    <DashboardLayout userType="student">
+      <div className="space-y-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              My Profile
+            </h1>
+            <p className="text-gray-500 dark:text-gray-400 mt-2">
+              Manage your personal information
+            </p>
+          </div>
+          {!isEditing ? (
+            <Button
+              onClick={() => setIsEditing(true)}
+              className="flex items-center gap-2"
+            >
+              <Edit2 className="w-4 h-4" />
+              Edit Profile
+            </Button>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={handleSave}
+                disabled={saving}
+                isLoading={saving}
+                className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+              >
+                <Save className="w-4 h-4" />
+                Save Changes
+              </Button>
+              <Button
+                onClick={handleCancel}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <X className="w-4 h-4" />
+                Cancel
+              </Button>
+            </div>
+          )}
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-gray-200 dark:border-slate-700 overflow-hidden">
-          {/* Profile Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-8">
-            <div className="flex items-center space-x-4">
-              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center">
-                <span className="text-2xl font-bold text-blue-600">
-                  {profile?.fullname?.charAt(0).toUpperCase()}
-                </span>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Profile Card */}
+          <Card className="lg:col-span-1">
+            <CardContent className="p-6 text-center">
+              <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">
+                {profile.fullname.charAt(0)}
               </div>
-              <div>
-                <h2 className="text-2xl font-bold text-white">
-                  {profile?.fullname}
-                </h2>
-                <p className="text-blue-100">
-                  {profile?.class} • Roll No: {profile?.rollNumber}
-                </p>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                {profile.fullname}
+              </h2>
+              <p className="text-gray-500 dark:text-gray-400 mb-4">
+                Roll Number: {profile.rollNumber}
+              </p>
+              <div className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(profile.status)}`}>
+                {profile.status.charAt(0).toUpperCase() + profile.status.slice(1)}
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          {/* Profile Content */}
-          <div className="p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Personal Information
-              </h3>
-              <button
-                onClick={() => setEditing(!editing)}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
-              >
-                {editing ? 'Cancel' : 'Edit Profile'}
-              </button>
-            </div>
-
-            {editing ? (
-              <form onSubmit={handleUpdateProfile} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Full Name
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.fullname}
-                      onChange={(e) => setFormData({...formData, fullname: e.target.value})}
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
-                      required
+          {/* Profile Details */}
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle>Personal Information</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Full Name
+                  </label>
+                  {isEditing ? (
+                    <Input
+                      value={editForm.fullname}
+                      onChange={(e) => setEditForm({ ...editForm, fullname: e.target.value })}
+                      placeholder="Enter your full name"
                     />
-                  </div>
+                  ) : (
+                    <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                      <User className="w-5 h-5 text-gray-400" />
+                      <span className="text-gray-900 dark:text-white">{profile.fullname}</span>
+                    </div>
+                  )}
+                </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Email (Read-only)
-                    </label>
-                    <input
-                      type="email"
-                      value={profile?.email}
-                      disabled
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg bg-gray-100 dark:bg-slate-600 text-gray-500 dark:text-gray-400"
-                    />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Email Address
+                  </label>
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                    <Mail className="w-5 h-5 text-gray-400" />
+                    <span className="text-gray-900 dark:text-white">{profile.email}</span>
                   </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Email cannot be changed
+                  </p>
+                </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Phone Number
-                    </label>
-                    <input
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Phone Number
+                  </label>
+                  {isEditing ? (
+                    <Input
+                      value={editForm.phone}
+                      onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
                       placeholder="Enter your phone number"
                     />
-                  </div>
+                  ) : (
+                    <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                      <Phone className="w-5 h-5 text-gray-400" />
+                      <span className="text-gray-900 dark:text-white">
+                        {profile.phone || 'Not provided'}
+                      </span>
+                    </div>
+                  )}
+                </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Date of Birth
-                    </label>
-                    <input
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Class
+                  </label>
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                    <GraduationCap className="w-5 h-5 text-gray-400" />
+                    <span className="text-gray-900 dark:text-white">{profile.class}</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Date of Birth
+                  </label>
+                  {isEditing ? (
+                    <Input
                       type="date"
-                      value={formData.dateOfBirth}
-                      onChange={(e) => setFormData({...formData, dateOfBirth: e.target.value})}
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                      value={editForm.dateOfBirth}
+                      onChange={(e) => setEditForm({ ...editForm, dateOfBirth: e.target.value })}
                     />
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Address
-                    </label>
-                    <textarea
-                      value={formData.address}
-                      onChange={(e) => setFormData({...formData, address: e.target.value})}
-                      rows={3}
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
-                      placeholder="Enter your address"
-                    />
-                  </div>
+                  ) : (
+                    <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                      <Calendar className="w-5 h-5 text-gray-400" />
+                      <span className="text-gray-900 dark:text-white">
+                        {profile.dateOfBirth 
+                          ? new Date(profile.dateOfBirth).toLocaleDateString()
+                          : 'Not provided'
+                        }
+                      </span>
+                    </div>
+                  )}
                 </div>
 
-                <div className="flex space-x-4">
-                  <button
-                    type="submit"
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
-                  >
-                    Save Changes
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setEditing(false)}
-                    className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                      Full Name
-                    </label>
-                    <p className="text-gray-900 dark:text-white font-medium">
-                      {profile?.fullname}
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                      Email
-                    </label>
-                    <p className="text-gray-900 dark:text-white font-medium">
-                      {profile?.email}
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                      Roll Number
-                    </label>
-                    <p className="text-gray-900 dark:text-white font-medium">
-                      {profile?.rollNumber}
-                    </p>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Registration Date
+                  </label>
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                    <Calendar className="w-5 h-5 text-gray-400" />
+                    <span className="text-gray-900 dark:text-white">
+                      {new Date(profile.createdAt).toLocaleDateString()}
+                    </span>
                   </div>
                 </div>
+              </div>
 
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                      Class
-                    </label>
-                    <p className="text-gray-900 dark:text-white font-medium">
-                      {profile?.class}
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                      Phone Number
-                    </label>
-                    <p className="text-gray-900 dark:text-white font-medium">
-                      {profile?.phone || 'Not provided'}
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                      Date of Birth
-                    </label>
-                    <p className="text-gray-900 dark:text-white font-medium">
-                      {profile?.dateOfBirth 
-                        ? new Date(profile.dateOfBirth).toLocaleDateString()
-                        : 'Not provided'
-                      }
-                    </p>
-                  </div>
-                </div>
-
-                {profile?.address && (
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                      Address
-                    </label>
-                    <p className="text-gray-900 dark:text-white font-medium">
-                      {profile.address}
-                    </p>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Address
+                </label>
+                {isEditing ? (
+                  <textarea
+                    value={editForm.address}
+                    onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
+                    placeholder="Enter your address"
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white resize-none"
+                  />
+                ) : (
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                    <span className="text-gray-900 dark:text-white">
+                      {profile.address || 'Not provided'}
+                    </span>
                   </div>
                 )}
               </div>
-            )}
-          </div>
-        </div>
-
-        {/* Account Information */}
-        <div className="mt-6 bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-slate-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Account Information
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                Account Status
-              </label>
-              <span className="inline-flex px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                Active
-              </span>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                Member Since
-              </label>
-              <p className="text-gray-900 dark:text-white font-medium">
-                {profile ? new Date(profile._id.substring(0, 8), 16).toLocaleDateString() : 'N/A'}
-              </p>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 }
