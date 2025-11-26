@@ -23,24 +23,46 @@ const getPendingStudents = async (req, res) => {
 // Approve/Reject student (Admin only)
 const updateStudentStatus = async (req, res) => {
   try {
-    const { status } = req.body;
-    const student = await Student.findByIdAndUpdate(
-      req.params.id,
-      { status },
-      { new: true }
-    ).select('-password');
+    // Fallback to query param if body is empty (robustness fix)
+    const status = req.body.status || req.query.status;
+    console.log(`Updating student ${req.params.id} status to ${status}`);
+    console.log('Request body:', req.body);
+    console.log('Content-Type:', req.headers['content-type']);
+    
+    if (!status) {
+      return res.status(400).json({ 
+        message: 'Status is required',
+        debug: {
+          receivedBody: req.body,
+          contentType: req.headers['content-type']
+        }
+      });
+    }
+
+    const student = await Student.findById(req.params.id);
+
+    if (!student) {
+      return res.status(404).json({ message: 'Student not found' });
+    }
+
+    // Update status
+    student.status = status;
+    const updatedStudent = await student.save();
+    
+    console.log('Updated student result:', updatedStudent);
     
     // Emit real-time event
     const io = req.app.get('io');
     if (io) {
       io.emit('student-status-updated', {
-        _id: student._id,
-        status: student.status
+        _id: updatedStudent._id,
+        status: updatedStudent.status
       });
     }
     
-    res.json({ success: true, data: student });
+    res.json({ success: true, data: updatedStudent });
   } catch (error) {
+    console.error('Update status error:', error);
     res.status(500).json({ message: error.message });
   }
 };

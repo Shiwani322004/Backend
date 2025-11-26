@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { api } from '@/utils/api';
 import { useAuth } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
+import { io } from 'socket.io-client';
 
 interface Student {
   _id: string;
@@ -33,6 +34,35 @@ export default function AllStudents() {
 
   useEffect(() => {
     fetchStudents();
+
+    // Real-time updates
+    const socket = io(process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:8000');
+
+    socket.on('connect', () => {
+      if (user?.id) {
+        socket.emit('join-room', user.id);
+      }
+    });
+
+    socket.on('student-registered', (newStudent: any) => {
+      // Add new student to list
+      setStudents(prev => {
+        if (prev.some(s => s._id === newStudent._id)) return prev;
+        return [newStudent, ...prev];
+      });
+      toast.success('New student registered');
+    });
+
+    socket.on('student-status-updated', (data: any) => {
+      // Update student status
+      setStudents(prev => prev.map(student => 
+        student._id === data._id ? { ...student, status: data.status } : student
+      ));
+    });
+
+    return () => {
+      socket.disconnect();
+    };
   }, [user]);
 
   const fetchStudents = async () => {

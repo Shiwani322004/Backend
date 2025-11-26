@@ -88,7 +88,8 @@ class ApiClient {
   }
 
   async updateStudentStatus(id: string, status: string, token: string) {
-    return this.request(`/students/${id}/status`, {
+    // Send status in both query and body for robustness
+    return this.request(`/students/${id}/status?status=${status}`, {
       method: 'PUT',
       headers: this.getAuthHeaders(token),
       body: JSON.stringify({ status })

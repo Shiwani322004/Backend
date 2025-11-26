@@ -48,6 +48,14 @@ export default function PendingApprovals() {
       toast.success('New student registration received!');
     });
 
+    socket.on('student-status-updated', (data: any) => {
+      // Remove student from pending list if status changed
+      if (data.status !== 'pending') {
+        setPendingStudents(prev => prev.filter(s => s._id !== data._id));
+        // Optional: toast notification if needed, but might be redundant if admin did it
+      }
+    });
+
     return () => {
       socket.disconnect();
     };
