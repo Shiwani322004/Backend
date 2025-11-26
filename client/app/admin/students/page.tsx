@@ -38,8 +38,11 @@ export default function AllStudents() {
   const fetchStudents = async () => {
     try {
       if (user?.token) {
+      if (user?.token) {
         const response = await api.getAllStudents(user.token);
-        setStudents(response.students || []);
+        // api.ts now returns the data array directly
+        setStudents(response || []);
+      }
       }
     } catch (error) {
       console.error('Failed to fetch students:', error);

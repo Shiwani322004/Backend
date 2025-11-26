@@ -27,7 +27,15 @@ class ApiClient {
         return null;
       }
 
-      return await response.json();
+      const responseData = await response.json();
+      
+      // If the response has a 'data' property (standard backend format), return that
+      if (responseData && responseData.success === true && responseData.data !== undefined) {
+        return responseData.data;
+      }
+      
+      // Otherwise return the whole response (for backward compatibility or non-standard endpoints)
+      return responseData;
     } catch (error) {
       console.error(`API Error (${endpoint}):`, error);
       throw error;

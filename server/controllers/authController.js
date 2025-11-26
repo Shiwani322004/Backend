@@ -29,6 +29,20 @@ const registerStudent = async (req, res) => {
     
     console.log('Student created:', student._id);
     
+    // Emit real-time event
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('student-registered', {
+        _id: student._id,
+        fullname: student.fullname,
+        email: student.email,
+        rollNumber: student.rollNumber,
+        class: student.class,
+        status: student.status,
+        createdAt: student.createdAt
+      });
+    }
+    
     res.status(201).json({
       message: 'Registration submitted for approval',
       student: {

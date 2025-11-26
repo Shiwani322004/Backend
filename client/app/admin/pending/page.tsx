@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { api } from '@/utils/api';
 import { useAuth } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
+import { io } from 'socket.io-client';
 
 interface PendingStudent {
   _id: string;
@@ -28,13 +29,38 @@ export default function PendingApprovals() {
 
   useEffect(() => {
     fetchPendingStudents();
+
+    // Real-time updates
+    const socket = io(process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:8000');
+
+    socket.on('connect', () => {
+      if (user?.id) {
+        socket.emit('join-room', user.id);
+      }
+    });
+
+    socket.on('student-registered', (newStudent: any) => {
+      // Add new student to list if not already there
+      setPendingStudents(prev => {
+        if (prev.some(s => s._id === newStudent._id)) return prev;
+        return [newStudent, ...prev];
+      });
+      toast.success('New student registration received!');
+    });
+
+    return () => {
+      socket.disconnect();
+    };
   }, [user]);
 
   const fetchPendingStudents = async () => {
     try {
       if (user?.token) {
+      if (user?.token) {
         const response = await api.getPendingStudents(user.token);
-        setPendingStudents(response.students || []);
+        // api.ts now returns the data array directly
+        setPendingStudents(response || []);
+      }
       }
     } catch (error) {
       console.error('Failed to fetch pending students:', error);

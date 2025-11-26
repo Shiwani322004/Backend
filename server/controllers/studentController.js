@@ -30,6 +30,15 @@ const updateStudentStatus = async (req, res) => {
       { new: true }
     ).select('-password');
     
+    // Emit real-time event
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('student-status-updated', {
+        _id: student._id,
+        status: student.status
+      });
+    }
+    
     res.json({ success: true, data: student });
   } catch (error) {
     res.status(500).json({ message: error.message });

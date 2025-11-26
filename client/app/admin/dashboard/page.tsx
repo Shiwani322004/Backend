@@ -6,6 +6,8 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { api } from '@/utils/api';
 import { useAuth } from '@/context/AuthContext';
+import toast from 'react-hot-toast';
+import { io } from 'socket.io-client';
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -31,6 +33,47 @@ export default function AdminDashboard() {
     };
 
     fetchStats();
+
+    // Real-time updates
+    const socket = io(process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:8000');
+
+    socket.on('connect', () => {
+      console.log('Connected to socket server');
+      if (user?.id) {
+        socket.emit('join-room', user.id);
+      }
+    });
+
+    socket.on('student-registered', () => {
+      // Increment pending count
+      setStats(prev => ({
+        ...prev,
+        pendingApprovals: prev.pendingApprovals + 1
+      }));
+      toast.success('New student registration received!');
+    });
+
+    socket.on('student-status-updated', (data: any) => {
+      if (data.status === 'approved') {
+        // Decrement pending, increment active/total
+        setStats(prev => ({
+          ...prev,
+          pendingApprovals: Math.max(0, prev.pendingApprovals - 1),
+          totalStudents: prev.totalStudents + 1,
+          activeStudents: prev.activeStudents + 1 // Assuming active by default
+        }));
+      } else if (data.status === 'rejected') {
+        // Decrement pending
+        setStats(prev => ({
+          ...prev,
+          pendingApprovals: Math.max(0, prev.pendingApprovals - 1)
+        }));
+      }
+    });
+
+    return () => {
+      socket.disconnect();
+    };
   }, [user]);
 
   const statCards = [
