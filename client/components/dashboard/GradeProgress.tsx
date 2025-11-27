@@ -1,5 +1,5 @@
 "use client";
-import { motion } from 'framer-motion';
+
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
 
 interface Grade {
@@ -47,11 +47,8 @@ export default function GradeProgress({ grades }: GradeProgressProps) {
           {grades.map((grade, index) => {
             const percentage = (grade.marks / grade.totalMarks) * 100;
             return (
-              <motion.div
+              <div
                 key={index}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.1 }}
                 className="space-y-2"
               >
                 <div className="flex justify-between items-center">
@@ -68,14 +65,12 @@ export default function GradeProgress({ grades }: GradeProgressProps) {
                   </div>
                 </div>
                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                  <motion.div
+                  <div
                     className={`h-2 rounded-full ${getGradeColor(percentage)}`}
-                    initial={{ width: 0 }}
-                    animate={{ width: `${percentage}%` }}
-                    transition={{ duration: 0.8, delay: index * 0.1 }}
+                    style={{ width: `${percentage}%` }}
                   />
                 </div>
-              </motion.div>
+              </div>
             );
           })}
         </div>

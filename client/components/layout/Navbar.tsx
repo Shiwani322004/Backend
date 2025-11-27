@@ -1,6 +1,6 @@
 "use client";
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+
 import { User, Settings, GraduationCap, LogOut } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import ThemeToggle from '../ui/themetoggle';
@@ -24,19 +24,14 @@ export default function Navbar() {
   };
 
   return (
-    <motion.nav 
+    <nav 
       className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-slate-700/50 sticky top-0 z-50 transition-all duration-300"
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
-          <motion.div 
+          <div 
             className="flex items-center"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
           >
             <Link href="/" className="flex items-center gap-3 group">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:shadow-blue-500/30 transition-all duration-300">
@@ -46,7 +41,7 @@ export default function Navbar() {
                 EduManage
               </span>
             </Link>
-          </motion.div>
+          </div>
 
           {/* Right side */}
           <div className="flex items-center gap-4">
@@ -54,11 +49,9 @@ export default function Navbar() {
             
             {user ? (
               <div className="relative">
-                <motion.button
+                <button
                   onClick={() => setShowProfile(!showProfile)}
                   className="flex items-center gap-3 p-1.5 pr-4 rounded-full border border-gray-200/50 dark:border-slate-700/50 bg-white/50 dark:bg-slate-800/50 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all duration-200 shadow-sm hover:shadow-md"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
                 >
                   <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full flex items-center justify-center shadow-md text-white text-sm font-medium ring-2 ring-white dark:ring-slate-900">
                     {user.fullname?.[0] || <User size={16} />}
@@ -68,16 +61,12 @@ export default function Navbar() {
                       {user.fullname?.split(' ')[0]}
                     </p>
                   </div>
-                </motion.button>
+                </button>
 
                 {/* Profile Dropdown */}
                 {showProfile && (
-                  <motion.div
+                  <div
                     className="absolute right-0 mt-3 w-72 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-200/50 dark:border-slate-700/50 py-2 overflow-hidden ring-1 ring-black/5"
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    transition={{ duration: 0.2 }}
                   >
                     <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-700/50 bg-gray-50/50 dark:bg-slate-800/50">
                       <p className="text-sm font-semibold text-gray-900 dark:text-white">{user.fullname}</p>
@@ -113,34 +102,30 @@ export default function Navbar() {
                         Sign Out
                       </button>
                     </div>
-                  </motion.div>
+                  </div>
                 )}
               </div>
             ) : (
               <div className="flex items-center gap-3">
                 <Link href="/auth/login">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                  <button
                     className="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                   >
                     Log in
-                  </motion.button>
+                  </button>
                 </Link>
                 <Link href="/auth/register">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                  <button
                     className="px-5 py-2.5 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg shadow-blue-500/25 transition-all"
                   >
                     Get Started
-                  </motion.button>
+                  </button>
                 </Link>
               </div>
             )}
           </div>
         </div>
       </div>
-    </motion.nav>
+    </nav>
   );
 }

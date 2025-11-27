@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+
 import { User, Mail, Phone, Calendar, GraduationCap, Edit2, Save, X } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';

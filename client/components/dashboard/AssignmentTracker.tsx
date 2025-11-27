@@ -1,5 +1,5 @@
 "use client";
-import { motion } from 'framer-motion';
+
 import { Calendar, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
 import { format, isAfter, isBefore, addDays } from 'date-fns';
@@ -48,11 +48,8 @@ export default function AssignmentTracker({ assignments }: AssignmentTrackerProp
       <CardContent>
         <div className="space-y-3 max-h-64 overflow-y-auto">
           {sortedAssignments.map((assignment, index) => (
-            <motion.div
+            <div
               key={assignment.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
               className={`p-3 rounded-lg border-l-4 ${getPriorityColor(assignment.priority)}`}
             >
               <div className="flex items-start justify-between">
@@ -81,7 +78,7 @@ export default function AssignmentTracker({ assignments }: AssignmentTrackerProp
                   {assignment.status}
                 </span>
               </div>
-            </motion.div>
+            </div>
           ))}
           {sortedAssignments.length === 0 && (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { motion } from "framer-motion";
+
 import { cn } from "@/utils/cn";
 
 export interface InputProps
@@ -17,11 +17,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             {label}
           </label>
         )}
-        <motion.div
-          initial={false}
-          animate={error ? { x: [0, -10, 10, -10, 10, 0] } : {}}
-          transition={{ duration: 0.4 }}
-        >
+        <div>
           <input
             type={type}
             className={cn(
@@ -32,15 +28,13 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             {...props}
           />
-        </motion.div>
+        </div>
         {error && (
-          <motion.p
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
+          <p
             className="text-sm font-medium text-red-500"
           >
             {error}
-          </motion.p>
+          </p>
         )}
       </div>
     );

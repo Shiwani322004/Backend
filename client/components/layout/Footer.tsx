@@ -1,6 +1,6 @@
 "use client";
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+
 import { 
   GraduationCap, 
   Mail, 
@@ -62,12 +62,7 @@ export default function Footer() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
             {/* Brand Section */}
             <div className="lg:col-span-2">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-                viewport={{ once: true }}
-              >
+              <div>
                 <div className="flex items-center space-x-3 mb-6">
                   <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
                     <GraduationCap className="w-7 h-7 text-white" />
@@ -96,17 +91,13 @@ export default function Footer() {
                     <span className="text-sm">San Francisco, CA</span>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             </div>
             
             {/* Links Sections */}
             {Object.entries(footerLinks).map(([category, links], index) => (
-              <motion.div
+              <div
                 key={category}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true }}
               >
                 <h4 className="text-lg font-semibold mb-4 capitalize text-white">
                   {category}
@@ -123,17 +114,13 @@ export default function Footer() {
                     </li>
                   ))}
                 </ul>
-              </motion.div>
+              </div>
             ))}
           </div>
           
           {/* Newsletter Section */}
-          <motion.div
+          <div
             className="mt-12 pt-8 border-t border-gray-800"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            viewport={{ once: true }}
           >
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
               <div>
@@ -150,16 +137,14 @@ export default function Footer() {
                   placeholder="Enter your email"
                   className="flex-1 px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
-                <motion.button
+                <button
                   className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
                 >
                   Subscribe
-                </motion.button>
+                </button>
               </div>
             </div>
-          </motion.div>
+          </div>
         </div>
         
         {/* Bottom Section */}
@@ -177,29 +162,25 @@ export default function Footer() {
               {/* Social Links */}
               <div className="flex items-center space-x-4">
                 {socialLinks.map((social) => (
-                  <motion.a
+                  <a
                     key={social.name}
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-10 h-10 bg-gray-800 hover:bg-gray-700 rounded-lg flex items-center justify-center text-gray-400 hover:text-white transition-all duration-300"
-                    whileHover={{ scale: 1.1, y: -2 }}
-                    whileTap={{ scale: 0.95 }}
                   >
                     <social.icon className="w-5 h-5" />
-                  </motion.a>
+                  </a>
                 ))}
                 
                 {/* Scroll to Top */}
-                <motion.button
+                <button
                   onClick={scrollToTop}
                   className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center text-white shadow-lg"
-                  whileHover={{ scale: 1.1, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
                   title="Scroll to top"
                 >
                   <ArrowUp className="w-5 h-5" />
-                </motion.button>
+                </button>
               </div>
             </div>
           </div>

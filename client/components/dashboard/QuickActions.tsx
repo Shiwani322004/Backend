@@ -1,5 +1,5 @@
 "use client";
-import { motion } from 'framer-motion';
+
 import { BookOpen, Calendar, MessageSquare, Settings, FileText, Users } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
 import Link from 'next/link';
@@ -68,18 +68,13 @@ export default function QuickActions() {
       <CardContent>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {actions.map((action, index) => (
-            <motion.div
+            <div
               key={action.title}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.1 }}
             >
               <Link href={action.href}>
-                <motion.div
+                <div
                   className="p-4 rounded-lg bg-gradient-to-r text-white cursor-pointer"
                   style={{ backgroundImage: `linear-gradient(to right, var(--tw-gradient-stops))` }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
                 >
                   <div className={`bg-gradient-to-r ${action.color} p-4 rounded-lg text-white`}>
                     <div className="flex flex-col items-center text-center space-y-2">
@@ -90,9 +85,9 @@ export default function QuickActions() {
                       </div>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               </Link>
-            </motion.div>
+            </div>
           ))}
         </div>
       </CardContent>

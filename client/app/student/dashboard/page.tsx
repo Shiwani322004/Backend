@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import Link from 'next/link';
 import { Calendar, BookOpen, TrendingUp, Clock, Award, Bell } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -138,12 +138,7 @@ export default function StudentDashboard() {
           {statCards.map((stat, index) => {
             const Icon = stat.icon;
             return (
-              <motion.div
-                key={stat.title}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-              >
+              <div key={stat.title}>
                 <Card className="border-none shadow-lg hover:shadow-xl transition-shadow">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
@@ -164,7 +159,7 @@ export default function StudentDashboard() {
                     </div>
                   </CardContent>
                 </Card>
-              </motion.div>
+              </div>
             );
           })}
         </div>
@@ -183,11 +178,8 @@ export default function StudentDashboard() {
                 {recentActivities.map((activity, index) => {
                   const Icon = activity.icon;
                   return (
-                    <motion.div
+                    <div
                       key={index}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
                       className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50"
                     >
                       <div className={`p-2 rounded-full bg-white dark:bg-gray-700`}>
@@ -204,7 +196,7 @@ export default function StudentDashboard() {
                           {activity.time}
                         </p>
                       </div>
-                    </motion.div>
+                    </div>
                   );
                 })}
               </div>
@@ -221,45 +213,45 @@ export default function StudentDashboard() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-left hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
-                >
-                  <Calendar className="w-6 h-6 text-blue-600 mb-2" />
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">View Attendance</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Check your attendance record</p>
-                </motion.button>
+                <Link href="/student/attendance">
+                  <button
+                    className="w-full p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-left hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+                  >
+                    <Calendar className="w-6 h-6 text-blue-600 mb-2" />
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">View Attendance</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Check your attendance record</p>
+                  </button>
+                </Link>
                 
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-left hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
-                >
-                  <Award className="w-6 h-6 text-green-600 mb-2" />
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">View Grades</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Check your latest grades</p>
-                </motion.button>
+                <Link href="/student/grades">
+                  <button
+                    className="w-full p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-left hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
+                  >
+                    <Award className="w-6 h-6 text-green-600 mb-2" />
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">View Grades</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Check your latest grades</p>
+                  </button>
+                </Link>
                 
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-left hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors"
-                >
-                  <BookOpen className="w-6 h-6 text-purple-600 mb-2" />
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">Assignments</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">View pending assignments</p>
-                </motion.button>
+                <Link href="/student/notifications">
+                  <button
+                    className="w-full p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-left hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors"
+                  >
+                    <Bell className="w-6 h-6 text-purple-600 mb-2" />
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">Notifications</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">View all notifications</p>
+                  </button>
+                </Link>
                 
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg text-left hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors"
-                >
-                  <Clock className="w-6 h-6 text-orange-600 mb-2" />
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">Schedule</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">View class schedule</p>
-                </motion.button>
+                <Link href="/student/profile">
+                  <button
+                    className="w-full p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg text-left hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors"
+                  >
+                    <BookOpen className="w-6 h-6 text-orange-600 mb-2" />
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">My Profile</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">View and edit profile</p>
+                  </button>
+                </Link>
               </div>
             </CardContent>
           </Card>

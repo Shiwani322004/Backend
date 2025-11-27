@@ -1,5 +1,5 @@
 "use client";
-import { motion } from 'framer-motion';
+
 import { TrendingUp, TrendingDown, LucideIcon } from 'lucide-react';
 import { Card, CardContent } from '../ui/Card';
 
@@ -67,12 +67,7 @@ export default function StatsCard({
   }
 
   return (
-    <motion.div
-      whileHover={{ scale: 1.02, y: -4 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-    >
+    <div>
       <Card className={`overflow-hidden border-0 shadow-lg hover:shadow-2xl ${shadowClasses[color as keyof typeof shadowClasses]} transition-all duration-300 bg-white dark:bg-gray-800`}>
         <CardContent className="p-6 relative">
           {/* Background decoration */}
@@ -85,14 +80,11 @@ export default function StatsCard({
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1 uppercase tracking-wide">
                 {title}
               </p>
-              <motion.p 
+              <p 
                 className="text-3xl font-bold text-gray-900 dark:text-white mb-2"
-                initial={{ scale: 0.5 }}
-                animate={{ scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
               >
                 {value}
-              </motion.p>
+              </p>
               
               {subtitle && (
                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
@@ -101,11 +93,8 @@ export default function StatsCard({
               )}
               
               {trend && (
-                <motion.div 
+                <div 
                   className="flex items-center"
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5, delay: 0.4 }}
                 >
                   <div className={`flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                     trend.isPositive 
@@ -122,20 +111,18 @@ export default function StatsCard({
                   <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
                     vs last period
                   </span>
-                </motion.div>
+                </div>
               )}
             </div>
             
-            <motion.div 
+            <div 
               className={`w-14 h-14 bg-gradient-to-r ${colorClasses[color as keyof typeof colorClasses]} rounded-xl flex items-center justify-center text-white shadow-lg`}
-              whileHover={{ rotate: 5, scale: 1.1 }}
-              transition={{ duration: 0.2 }}
             >
               <Icon className="w-6 h-6" />
-            </motion.div>
+            </div>
           </div>
         </CardContent>
       </Card>
-    </motion.div>
+    </div>
   );
 }

@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { motion } from 'framer-motion';
+
 import { cn } from '@/utils/cn';
 import { 
   LayoutDashboard, 
@@ -69,9 +69,7 @@ export default function Sidebar({ userType }: SidebarProps) {
       </button>
 
       {/* Sidebar */}
-      <motion.aside
-        initial={{ x: -300 }}
-        animate={{ x: isOpen ? 0 : -300 }}
+      <aside
         className={cn(
           "fixed top-0 left-0 z-40 h-screen w-72 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-r border-gray-200/50 dark:border-slate-700/50 transition-all duration-300 ease-in-out lg:translate-x-0 lg:static shadow-2xl lg:shadow-none",
           !isOpen && "lg:hidden"
@@ -114,11 +112,8 @@ export default function Sidebar({ userType }: SidebarProps) {
                       : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-800/50 hover:text-gray-900 dark:hover:text-gray-200"
                   )}>
                     {isActive && (
-                      <motion.div
-                        layoutId="activeTab"
+                      <div
                         className="absolute inset-0 bg-blue-50 dark:bg-blue-900/20 rounded-xl"
-                        initial={false}
-                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
                       />
                     )}
                     <Icon size={20} className={cn("relative z-10", isActive && "text-blue-600 dark:text-blue-400")} />
@@ -146,7 +141,7 @@ export default function Sidebar({ userType }: SidebarProps) {
             </button>
           </div>
         </div>
-      </motion.aside>
+      </aside>
     </>
   );
 }

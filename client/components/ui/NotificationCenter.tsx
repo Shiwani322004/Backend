@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import { Bell, X, Check, Info, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
 import { api, Notification } from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
@@ -68,45 +68,33 @@ export default function NotificationCenter() {
   return (
     <div className="relative">
       {/* Notification Bell */}
-      <motion.button
+      <button
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
       >
         <Bell className="w-6 h-6" />
         {unreadCount > 0 && (
-          <motion.span
+          <span
             className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", stiffness: 500, damping: 30 }}
           >
             {unreadCount > 9 ? '9+' : unreadCount}
-          </motion.span>
+          </span>
         )}
-      </motion.button>
+      </button>
 
       {/* Notification Panel */}
-      <AnimatePresence>
+
         {isOpen && (
           <>
             {/* Backdrop */}
-            <motion.div
+            <div
               className="fixed inset-0 z-40"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
               onClick={() => setIsOpen(false)}
             />
             
             {/* Panel */}
-            <motion.div
+            <div
               className="absolute right-0 mt-2 w-96 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 z-50 max-h-96 overflow-hidden"
-              initial={{ opacity: 0, y: -10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.95 }}
-              transition={{ duration: 0.2 }}
             >
               {/* Header */}
               <div className="p-4 border-b border-gray-200 dark:border-gray-700">
@@ -143,14 +131,11 @@ export default function NotificationCenter() {
                 ) : (
                   <div className="divide-y divide-gray-200 dark:divide-gray-700">
                     {notifications.map((notification) => (
-                      <motion.div
+                      <div
                         key={notification.id}
                         className={`p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors ${
                           !notification.read ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
                         }`}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.3 }}
                       >
                         <div className="flex items-start space-x-3">
                           <div className="flex-shrink-0 mt-1">
@@ -190,7 +175,7 @@ export default function NotificationCenter() {
                             </div>
                           </div>
                         </div>
-                      </motion.div>
+                      </div>
                     ))}
                   </div>
                 )}
@@ -207,10 +192,10 @@ export default function NotificationCenter() {
                   </button>
                 </div>
               )}
-            </motion.div>
+            </div>
           </>
         )}
-      </AnimatePresence>
+
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+
 import { 
   GraduationCap, 
   Users, 
@@ -34,75 +34,42 @@ export default function LandingPage() {
         
         <section className="relative pt-20 pb-32 lg:pt-32 lg:pb-40">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-sm font-medium mb-8"
-            >
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-sm font-medium mb-8">
               <Star className="w-4 h-4 fill-current" />
               <span>Trusted by 1000+ Institutions Worldwide</span>
-            </motion.div>
+            </div>
             
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-5xl md:text-7xl font-bold text-gray-900 dark:text-white mb-8 tracking-tight"
-            >
+            <h1 className="text-5xl md:text-7xl font-bold text-gray-900 dark:text-white mb-8 tracking-tight">
               The Future of <br />
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 dark:from-blue-400 dark:via-indigo-400 dark:to-purple-400">
                 Education Management
               </span>
-            </motion.h1>
+            </h1>
             
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-xl text-gray-600 dark:text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed"
-            >
+            <p className="text-xl text-gray-600 dark:text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed">
               Streamline your institution's operations with our AI-powered platform. 
               From admissions to alumni, manage everything in one place with 
               unmatched efficiency and elegance.
-            </motion.p>
+            </p>
             
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center items-center"
-            >
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Link href="/auth/register">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-semibold text-lg shadow-xl shadow-blue-500/25 flex items-center gap-2 transition-all"
-                >
+                <button className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-semibold text-lg shadow-xl shadow-blue-500/25 flex items-center gap-2 transition-all">
                   Get Started Free
                   <ArrowRight className="w-5 h-5" />
-                </motion.button>
+                </button>
               </Link>
               
               <Link href="#features">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="px-8 py-4 bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-slate-700 rounded-2xl font-semibold text-lg hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center gap-2 transition-all"
-                >
+                <button className="px-8 py-4 bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-slate-700 rounded-2xl font-semibold text-lg hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center gap-2 transition-all">
                   <Zap className="w-5 h-5 text-yellow-500" />
                   View Features
-                </motion.button>
+                </button>
               </Link>
-            </motion.div>
+            </div>
 
             {/* Stats Grid */}
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-24 pt-12 border-t border-gray-200 dark:border-slate-800"
-            >
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-24 pt-12 border-t border-gray-200 dark:border-slate-800">
               {[
                 { label: 'Active Users', value: '50K+', icon: Users },
                 { label: 'Institutions', value: '1000+', icon: Award },
@@ -117,7 +84,7 @@ export default function LandingPage() {
                   <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">{stat.label}</div>
                 </div>
               ))}
-            </motion.div>
+            </div>
           </div>
         </section>
       </div>
@@ -173,13 +140,8 @@ export default function LandingPage() {
                 color: 'indigo'
               }
             ].map((feature, i) => (
-              <motion.div
+              <div
                 key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                whileHover={{ y: -5 }}
                 className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-sm hover:shadow-xl transition-all border border-gray-100 dark:border-slate-700"
               >
                 <div className={`w-12 h-12 rounded-2xl bg-${feature.color}-100 dark:bg-${feature.color}-900/30 flex items-center justify-center mb-6`}>
@@ -189,7 +151,7 @@ export default function LandingPage() {
                 <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
                   {feature.desc}
                 </p>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
@@ -210,22 +172,14 @@ export default function LandingPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/auth/register">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="px-8 py-4 bg-white text-blue-600 rounded-2xl font-bold text-lg shadow-xl hover:bg-blue-50 transition-colors"
-              >
+              <button className="px-8 py-4 bg-white text-blue-600 rounded-2xl font-bold text-lg shadow-xl hover:bg-blue-50 transition-colors">
                 Get Started Now
-              </motion.button>
+              </button>
             </Link>
             <Link href="/auth/login">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="px-8 py-4 bg-blue-700 text-white border border-blue-500 rounded-2xl font-bold text-lg hover:bg-blue-800 transition-colors"
-              >
+              <button className="px-8 py-4 bg-blue-700 text-white border border-blue-500 rounded-2xl font-bold text-lg hover:bg-blue-800 transition-colors">
                 Login to Dashboard
-              </motion.button>
+              </button>
             </Link>
           </div>
         </div>
