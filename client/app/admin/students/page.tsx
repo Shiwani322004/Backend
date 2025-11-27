@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Filter, MoreVertical, Trash2, Edit, Eye, UserCheck, Mail, Phone, GraduationCap } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -68,11 +68,9 @@ export default function AllStudents() {
   const fetchStudents = async () => {
     try {
       if (user?.token) {
-      if (user?.token) {
         const response = await api.getAllStudents(user.token);
         // api.ts now returns the data array directly
         setStudents(response || []);
-      }
       }
     } catch (error) {
       console.error('Failed to fetch students:', error);
@@ -114,13 +112,13 @@ export default function AllStudents() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'approved':
-        return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
+        return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border border-green-200 dark:border-green-800';
       case 'pending':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400';
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-800';
       case 'rejected':
-        return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400';
+        return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800';
       default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400 border border-gray-200 dark:border-gray-800';
     }
   };
 
@@ -146,8 +144,8 @@ export default function AllStudents() {
               Manage and view all registered students
             </p>
           </div>
-          <div className="flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-            <UserCheck className="w-5 h-5 text-blue-600" />
+          <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800">
+            <UserCheck className="w-5 h-5 text-blue-600 dark:text-blue-400" />
             <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
               {filteredStudents.length} Students
             </span>
@@ -155,7 +153,7 @@ export default function AllStudents() {
         </div>
 
         {/* Search and Filter */}
-        <Card>
+        <Card className="border-none shadow-lg bg-white/80 dark:bg-slate-800/80 backdrop-blur-md">
           <CardContent className="p-6">
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1 relative">
@@ -164,21 +162,23 @@ export default function AllStudents() {
                   placeholder="Search students by name, email, or roll number..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 h-11 bg-white dark:bg-slate-900"
                 />
               </div>
               <div className="flex items-center gap-2">
-                <Filter className="w-5 h-5 text-gray-400" />
-                <select
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
-                  className="px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                >
-                  <option value="all">All Status</option>
-                  <option value="approved">Approved</option>
-                  <option value="pending">Pending</option>
-                  <option value="rejected">Rejected</option>
-                </select>
+                <div className="relative">
+                  <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <select
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                    className="h-11 pl-9 pr-4 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none appearance-none cursor-pointer min-w-[160px]"
+                  >
+                    <option value="all">All Status</option>
+                    <option value="approved">Approved</option>
+                    <option value="pending">Pending</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
+                </div>
               </div>
             </div>
           </CardContent>
@@ -186,7 +186,7 @@ export default function AllStudents() {
 
         {/* Students Grid */}
         {filteredStudents.length === 0 ? (
-          <Card>
+          <Card className="border-dashed border-2 border-gray-200 dark:border-slate-700 bg-transparent shadow-none">
             <CardContent className="flex flex-col items-center justify-center py-16">
               <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
                 <UserCheck className="w-8 h-8 text-gray-400" />
@@ -204,97 +204,102 @@ export default function AllStudents() {
           </Card>
         ) : (
           <div className="grid gap-6">
-            {filteredStudents.map((student, index) => (
-              <motion.div
-                key={student._id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-              >
-                <Card className="border-none shadow-lg hover:shadow-xl transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-4 flex-1">
-                        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full flex items-center justify-center text-white font-semibold text-lg">
-                          {student.fullname.charAt(0)}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                              {student.fullname}
-                            </h3>
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(student.status)}`}>
-                              {student.status.charAt(0).toUpperCase() + student.status.slice(1)}
-                            </span>
+            <AnimatePresence>
+              {filteredStudents.map((student, index) => (
+                <motion.div
+                  key={student._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <Card className="border-none shadow-md hover:shadow-xl transition-all duration-300 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm group">
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-6 flex-1">
+                          <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform duration-300">
+                            {student.fullname.charAt(0)}
                           </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            <div className="flex items-center gap-2">
-                              <Mail className="w-4 h-4 text-gray-400" />
-                              <span className="text-sm text-gray-600 dark:text-gray-300">{student.email}</span>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                                {student.fullname}
+                              </h3>
+                              <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${getStatusColor(student.status)}`}>
+                                {student.status.charAt(0).toUpperCase() + student.status.slice(1)}
+                              </span>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <GraduationCap className="w-4 h-4 text-gray-400" />
-                              <span className="text-sm text-gray-600 dark:text-gray-300">Roll: {student.rollNumber}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <GraduationCap className="w-4 h-4 text-gray-400" />
-                              <span className="text-sm text-gray-600 dark:text-gray-300">Class: {student.class}</span>
-                            </div>
-                            {student.phone && (
-                              <div className="flex items-center gap-2">
-                                <Phone className="w-4 h-4 text-gray-400" />
-                                <span className="text-sm text-gray-600 dark:text-gray-300">{student.phone}</span>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-2">
+                              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                                <Mail className="w-4 h-4 text-gray-400" />
+                                <span className="text-sm truncate">{student.email}</span>
                               </div>
-                            )}
+                              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                                <GraduationCap className="w-4 h-4 text-gray-400" />
+                                <span className="text-sm">Roll: {student.rollNumber}</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                                <GraduationCap className="w-4 h-4 text-gray-400" />
+                                <span className="text-sm">Class: {student.class}</span>
+                              </div>
+                              {student.phone && (
+                                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                                  <Phone className="w-4 h-4 text-gray-400" />
+                                  <span className="text-sm">{student.phone}</span>
+                                </div>
+                              )}
+                            </div>
+                            <div className="mt-3 flex items-center gap-2">
+                              <span className="text-xs text-gray-400 bg-gray-100 dark:bg-slate-800 px-2 py-1 rounded-md">
+                                Registered: {new Date(student.createdAt).toLocaleDateString()}
+                              </span>
+                            </div>
                           </div>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                            Registered: {new Date(student.createdAt).toLocaleDateString()}
-                          </p>
+                        </div>
+                        
+                        {/* Actions Dropdown */}
+                        <div className="relative">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setShowDropdown(showDropdown === student._id ? null : student._id)}
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-full"
+                          >
+                            <MoreVertical className="w-5 h-5 text-gray-500" />
+                          </Button>
+                          
+                          {showDropdown === student._id && (
+                            <motion.div
+                              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                              animate={{ opacity: 1, scale: 1, y: 0 }}
+                              className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-gray-200 dark:border-slate-700 py-2 z-10 overflow-hidden"
+                            >
+                              <button className="w-full px-4 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center gap-3 transition-colors">
+                                <Eye className="w-4 h-4 text-gray-400" />
+                                View Details
+                              </button>
+                              <button className="w-full px-4 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center gap-3 transition-colors">
+                                <Edit className="w-4 h-4 text-gray-400" />
+                                Edit Student
+                              </button>
+                              <div className="h-px bg-gray-100 dark:bg-slate-700 my-1" />
+                              <button
+                                onClick={() => handleDeleteStudent(student._id)}
+                                disabled={actionLoading === student._id}
+                                className="w-full px-4 py-2.5 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-3 transition-colors"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                                {actionLoading === student._id ? 'Deleting...' : 'Delete Student'}
+                              </button>
+                            </motion.div>
+                          )}
                         </div>
                       </div>
-                      
-                      {/* Actions Dropdown */}
-                      <div className="relative">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setShowDropdown(showDropdown === student._id ? null : student._id)}
-                          className="p-2"
-                        >
-                          <MoreVertical className="w-4 h-4" />
-                        </Button>
-                        
-                        {showDropdown === student._id && (
-                          <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-10"
-                          >
-                            <button className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2">
-                              <Eye className="w-4 h-4" />
-                              View Details
-                            </button>
-                            <button className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2">
-                              <Edit className="w-4 h-4" />
-                              Edit Student
-                            </button>
-                            <div className="h-px bg-gray-200 dark:bg-gray-700 my-1" />
-                            <button
-                              onClick={() => handleDeleteStudent(student._id)}
-                              disabled={actionLoading === student._id}
-                              className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                              {actionLoading === student._id ? 'Deleting...' : 'Delete Student'}
-                            </button>
-                          </motion.div>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
         )}
       </div>

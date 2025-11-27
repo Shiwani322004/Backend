@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Users, Check, X, Clock, Search, Filter } from 'lucide-react';
+import { Calendar, Users, Check, X, Clock, Search, Filter, Save } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -99,11 +99,11 @@ export default function AttendancePage() {
   const getStatusColor = (status: 'present' | 'absent' | 'late') => {
     switch (status) {
       case 'present':
-        return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800';
+        return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800 ring-2 ring-green-500/20';
       case 'absent':
-        return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800';
+        return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800 ring-2 ring-red-500/20';
       case 'late':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800';
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800 ring-2 ring-yellow-500/20';
     }
   };
 
@@ -150,43 +150,50 @@ export default function AttendancePage() {
             onClick={handleSaveAttendance}
             disabled={saving}
             isLoading={saving}
-            className="bg-blue-600 hover:bg-blue-700"
+            className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/25"
           >
+            <Save className="w-4 h-4 mr-2" />
             Save Attendance
           </Button>
         </div>
 
         {/* Controls */}
-        <Card>
+        <Card className="border-none shadow-lg bg-white/80 dark:bg-slate-800/80 backdrop-blur-md">
           <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Date
                 </label>
-                <input
-                  type="date"
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                />
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    className="w-full pl-10 pr-3 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                  />
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Class Filter
                 </label>
-                <select
-                  value={selectedClass}
-                  onChange={(e) => setSelectedClass(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                >
-                  <option value="all">All Classes</option>
-                  <option value="10th">10th Grade</option>
-                  <option value="11th">11th Grade</option>
-                  <option value="12th">12th Grade</option>
-                  <option value="BSc">BSc</option>
-                  <option value="MSc">MSc</option>
-                </select>
+                <div className="relative">
+                  <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <select
+                    value={selectedClass}
+                    onChange={(e) => setSelectedClass(e.target.value)}
+                    className="w-full pl-10 pr-3 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all appearance-none"
+                  >
+                    <option value="all">All Classes</option>
+                    <option value="10th">10th Grade</option>
+                    <option value="11th">11th Grade</option>
+                    <option value="12th">12th Grade</option>
+                    <option value="BSc">BSc</option>
+                    <option value="MSc">MSc</option>
+                  </select>
+                </div>
               </div>
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -198,7 +205,7 @@ export default function AttendancePage() {
                     placeholder="Search by name or roll number..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 h-[42px] bg-white dark:bg-slate-900"
                   />
                 </div>
               </div>
@@ -208,60 +215,68 @@ export default function AttendancePage() {
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card>
+          <Card className="border-none shadow-md bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Students</p>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{filteredStudents.length}</h3>
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{filteredStudents.length}</h3>
                 </div>
-                <Users className="w-8 h-8 text-blue-600" />
+                <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+                  <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                </div>
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="border-none shadow-md bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Present</p>
-                  <h3 className="text-2xl font-bold text-green-600">{attendanceStats.present}</h3>
+                  <h3 className="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">{attendanceStats.present}</h3>
                 </div>
-                <Check className="w-8 h-8 text-green-600" />
+                <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-full">
+                  <Check className="w-6 h-6 text-green-600 dark:text-green-400" />
+                </div>
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="border-none shadow-md bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Absent</p>
-                  <h3 className="text-2xl font-bold text-red-600">{attendanceStats.absent}</h3>
+                  <h3 className="text-2xl font-bold text-red-600 dark:text-red-400 mt-1">{attendanceStats.absent}</h3>
                 </div>
-                <X className="w-8 h-8 text-red-600" />
+                <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-full">
+                  <X className="w-6 h-6 text-red-600 dark:text-red-400" />
+                </div>
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="border-none shadow-md bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Late</p>
-                  <h3 className="text-2xl font-bold text-yellow-600">{attendanceStats.late}</h3>
+                  <h3 className="text-2xl font-bold text-yellow-600 dark:text-yellow-400 mt-1">{attendanceStats.late}</h3>
                 </div>
-                <Clock className="w-8 h-8 text-yellow-600" />
+                <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-full">
+                  <Clock className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
+                </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
         {/* Attendance List */}
-        <Card>
+        <Card className="border-none shadow-lg bg-white/80 dark:bg-slate-800/80 backdrop-blur-md">
           <CardHeader>
             <CardTitle>Student Attendance - {new Date(selectedDate).toLocaleDateString()}</CardTitle>
           </CardHeader>
           <CardContent>
             {filteredStudents.length === 0 ? (
-              <div className="text-center py-8">
+              <div className="text-center py-12">
                 <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-500 dark:text-gray-400">No students found</p>
               </div>
@@ -273,33 +288,33 @@ export default function AttendancePage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
-                    className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg"
+                    className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white dark:bg-slate-900/50 rounded-xl border border-gray-100 dark:border-slate-700 hover:shadow-md transition-all duration-200 gap-4"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full flex items-center justify-center text-white font-semibold">
+                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full flex items-center justify-center text-white font-semibold shadow-md">
                         {student.fullname.charAt(0)}
                       </div>
                       <div>
-                        <h4 className="font-medium text-gray-900 dark:text-white">{student.fullname}</h4>
+                        <h4 className="font-semibold text-gray-900 dark:text-white">{student.fullname}</h4>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
                           Roll: {student.rollNumber} • Class: {student.class}
                         </p>
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 bg-gray-50 dark:bg-slate-800 p-1.5 rounded-xl">
                       {(['present', 'late', 'absent'] as const).map((status) => (
                         <button
                           key={status}
                           onClick={() => handleAttendanceChange(student._id, status)}
-                          className={`px-3 py-2 rounded-lg border text-sm font-medium transition-colors flex items-center gap-2 ${
+                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
                             attendance[student._id] === status
-                              ? getStatusColor(status)
-                              : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
+                              ? getStatusColor(status) + ' shadow-sm'
+                              : 'text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-slate-700'
                           }`}
                         >
                           {getStatusIcon(status)}
-                          {status.charAt(0).toUpperCase() + status.slice(1)}
+                          <span className="capitalize">{status}</span>
                         </button>
                       ))}
                     </div>

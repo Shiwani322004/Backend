@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Award, Users, Search, Save, BookOpen } from 'lucide-react';
+import { Award, Users, Search, Save, BookOpen, GraduationCap } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -111,62 +111,90 @@ export default function ResultsPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Student Selection */}
-          <Card className="lg:col-span-1">
+          <Card className="lg:col-span-1 border-none shadow-lg bg-white/80 dark:bg-slate-800/80 backdrop-blur-md h-[calc(100vh-200px)] flex flex-col">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Users className="w-5 h-5" />
+                <Users className="w-5 h-5 text-blue-600" />
                 Select Student
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex-1 overflow-hidden flex flex-col">
               <div className="mb-4 relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input
                   placeholder="Search students..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9"
+                  className="pl-9 bg-white dark:bg-slate-900"
                 />
               </div>
-              <div className="space-y-2 max-h-[500px] overflow-y-auto pr-2">
+              <div className="space-y-2 overflow-y-auto pr-2 flex-1 custom-scrollbar">
                 {filteredStudents.map(student => (
                   <button
                     key={student._id}
                     onClick={() => setSelectedStudent(student._id)}
-                    className={`w-full text-left p-3 rounded-lg transition-colors border ${
+                    className={`w-full text-left p-3 rounded-xl transition-all duration-200 border ${
                       selectedStudent === student._id
-                        ? 'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800'
-                        : 'hover:bg-gray-50 border-transparent dark:hover:bg-gray-800'
+                        ? 'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800 shadow-sm'
+                        : 'hover:bg-gray-50 border-transparent dark:hover:bg-slate-700/50'
                     }`}
                   >
-                    <p className={`font-medium ${
-                      selectedStudent === student._id ? 'text-blue-700 dark:text-blue-300' : 'text-gray-900 dark:text-white'
-                    }`}>
-                      {student.fullname}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      Roll: {student.rollNumber} • {student.class}
-                    </p>
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                        selectedStudent === student._id 
+                          ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300' 
+                          : 'bg-gray-100 text-gray-600 dark:bg-slate-700 dark:text-gray-300'
+                      }`}>
+                        {student.fullname.charAt(0)}
+                      </div>
+                      <div>
+                        <p className={`font-medium text-sm ${
+                          selectedStudent === student._id ? 'text-blue-700 dark:text-blue-300' : 'text-gray-900 dark:text-white'
+                        }`}>
+                          {student.fullname}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Roll: {student.rollNumber}
+                        </p>
+                      </div>
+                    </div>
                   </button>
                 ))}
                 {filteredStudents.length === 0 && (
-                  <p className="text-center text-gray-500 py-4">No students found</p>
+                  <div className="text-center py-8">
+                    <Users className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                    <p className="text-sm text-gray-500">No students found</p>
+                  </div>
                 )}
               </div>
             </CardContent>
           </Card>
 
           {/* Grade Entry Form */}
-          <Card className="lg:col-span-2">
+          <Card className="lg:col-span-2 border-none shadow-lg bg-white/80 dark:bg-slate-800/80 backdrop-blur-md">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Award className="w-5 h-5" />
+                <Award className="w-5 h-5 text-blue-600" />
                 Add Grade
               </CardTitle>
             </CardHeader>
             <CardContent>
               {selectedStudent ? (
                 <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="p-4 bg-blue-50 dark:bg-blue-900/10 rounded-xl border border-blue-100 dark:border-blue-900/30 mb-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                        <GraduationCap className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Selected Student</p>
+                        <p className="font-semibold text-gray-900 dark:text-white">
+                          {students.find(s => s._id === selectedStudent)?.fullname}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -179,7 +207,7 @@ export default function ResultsPage() {
                           placeholder="e.g. Mathematics"
                           value={formData.subject}
                           onChange={(e) => setFormData({...formData, subject: e.target.value})}
-                          className="pl-9"
+                          className="pl-9 bg-white dark:bg-slate-900"
                         />
                       </div>
                     </div>
@@ -191,7 +219,7 @@ export default function ResultsPage() {
                       <select
                         value={formData.semester}
                         onChange={(e) => setFormData({...formData, semester: e.target.value})}
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="flex h-10 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         <option>1st Semester</option>
                         <option>2nd Semester</option>
@@ -215,6 +243,7 @@ export default function ResultsPage() {
                         placeholder="0"
                         value={formData.grade}
                         onChange={(e) => setFormData({...formData, grade: e.target.value})}
+                        className="bg-white dark:bg-slate-900"
                       />
                     </div>
 
@@ -228,6 +257,7 @@ export default function ResultsPage() {
                         min="1"
                         value={formData.maxGrade}
                         onChange={(e) => setFormData({...formData, maxGrade: e.target.value})}
+                        className="bg-white dark:bg-slate-900"
                       />
                     </div>
                   </div>
@@ -237,7 +267,7 @@ export default function ResultsPage() {
                       type="submit"
                       disabled={saving}
                       isLoading={saving}
-                      className="bg-blue-600 hover:bg-blue-700"
+                      className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/25 w-full md:w-auto"
                     >
                       <Save className="w-4 h-4 mr-2" />
                       Save Grade
@@ -245,9 +275,12 @@ export default function ResultsPage() {
                   </div>
                 </form>
               ) : (
-                <div className="flex flex-col items-center justify-center py-12 text-gray-500 dark:text-gray-400">
-                  <Users className="w-12 h-12 mb-4 opacity-20" />
-                  <p>Select a student from the list to add grades</p>
+                <div className="flex flex-col items-center justify-center py-20 text-gray-500 dark:text-gray-400 border-2 border-dashed border-gray-200 dark:border-slate-700 rounded-xl bg-gray-50/50 dark:bg-slate-900/50">
+                  <div className="w-16 h-16 bg-gray-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
+                    <Users className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <p className="font-medium">Select a student to add grades</p>
+                  <p className="text-sm mt-1">Choose a student from the list on the left</p>
                 </div>
               )}
             </CardContent>

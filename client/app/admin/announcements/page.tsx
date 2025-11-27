@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Megaphone, Send, Trash2, Clock, AlertCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Megaphone, Send, Trash2, Clock, AlertCircle, CheckCircle2 } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -15,7 +15,7 @@ interface Announcement {
   title: string;
   message: string;
   type: 'info' | 'warning' | 'important';
-  createdAt: Date;
+  createdAt: string; // Changed to string for JSON serialization
 }
 
 export default function AnnouncementsPage() {
@@ -28,6 +28,23 @@ export default function AnnouncementsPage() {
     type: 'info'
   });
 
+  // Load announcements from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('announcements');
+    if (saved) {
+      try {
+        setAnnouncements(JSON.parse(saved));
+      } catch (e) {
+        console.error('Failed to parse announcements', e);
+      }
+    }
+  }, []);
+
+  // Save announcements to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('announcements', JSON.stringify(announcements));
+  }, [announcements]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -35,17 +52,19 @@ export default function AnnouncementsPage() {
     try {
       const socket = io(process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:8000');
       
-      const newAnnouncement = {
+      const newAnnouncement: Announcement = {
         id: Date.now().toString(),
-        ...formData,
-        createdAt: new Date()
+        title: formData.title,
+        message: formData.message,
+        type: formData.type as 'info' | 'warning' | 'important',
+        createdAt: new Date().toISOString()
       };
 
       // Emit announcement to all connected clients
       socket.emit('admin-announcement', newAnnouncement);
       
       // Add to local list
-      setAnnouncements(prev => [newAnnouncement as Announcement, ...prev]);
+      setAnnouncements(prev => [newAnnouncement, ...prev]);
       
       toast.success('Announcement broadcasted successfully!');
       setFormData({ title: '', message: '', type: 'info' });
@@ -79,9 +98,12 @@ export default function AnnouncementsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Create Announcement Form */}
           <div className="lg:col-span-1">
-            <Card className="border-none shadow-lg sticky top-8">
+            <Card className="border-none shadow-lg sticky top-8 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md">
               <CardHeader>
-                <CardTitle>New Announcement</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Send className="w-5 h-5 text-blue-600" />
+                  New Announcement
+                </CardTitle>
                 <CardDescription>Send a notification to everyone</CardDescription>
               </CardHeader>
               <CardContent>
@@ -122,7 +144,7 @@ export default function AnnouncementsPage() {
                     </select>
                   </div>
 
-                  <Button type="submit" className="w-full" isLoading={loading}>
+                  <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/25" isLoading={loading}>
                     <Send className="w-4 h-4 mr-2" />
                     Broadcast
                   </Button>
@@ -133,12 +155,13 @@ export default function AnnouncementsPage() {
 
           {/* Announcements List */}
           <div className="lg:col-span-2 space-y-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+              <Clock className="w-5 h-5 text-gray-400" />
               Recent Announcements
             </h3>
             
             {announcements.length === 0 ? (
-              <Card>
+              <Card className="border-dashed border-2 border-gray-200 dark:border-slate-700 bg-transparent shadow-none">
                 <CardContent className="flex flex-col items-center justify-center py-16">
                   <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
                     <Megaphone className="w-8 h-8 text-gray-400" />
@@ -153,52 +176,65 @@ export default function AnnouncementsPage() {
               </Card>
             ) : (
               <div className="space-y-4">
-                {announcements.map((announcement, index) => (
-                  <motion.div
-                    key={announcement.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <Card className="border-none shadow-md hover:shadow-lg transition-shadow">
-                      <CardContent className="p-6">
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-start gap-4">
-                            <div className={`p-3 rounded-full ${
-                              announcement.type === 'important' ? 'bg-red-100 text-red-600' :
-                              announcement.type === 'warning' ? 'bg-yellow-100 text-yellow-600' :
-                              'bg-blue-100 text-blue-600'
-                            }`}>
-                              {announcement.type === 'important' ? <AlertCircle className="w-6 h-6" /> :
-                               announcement.type === 'warning' ? <AlertCircle className="w-6 h-6" /> :
-                               <Megaphone className="w-6 h-6" />}
-                            </div>
-                            <div>
-                              <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
-                                {announcement.title}
-                              </h4>
-                              <p className="text-gray-600 dark:text-gray-300 mt-1">
-                                {announcement.message}
-                              </p>
-                              <div className="flex items-center gap-2 mt-3 text-xs text-gray-500">
-                                <Clock className="w-3 h-3" />
-                                {announcement.createdAt.toLocaleString()}
+                <AnimatePresence>
+                  {announcements.map((announcement, index) => (
+                    <motion.div
+                      key={announcement.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, x: -100 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <Card className={`border-none shadow-md hover:shadow-lg transition-all duration-300 ${
+                        announcement.type === 'important' ? 'bg-red-50/50 dark:bg-red-900/10 border-l-4 border-red-500' :
+                        announcement.type === 'warning' ? 'bg-yellow-50/50 dark:bg-yellow-900/10 border-l-4 border-yellow-500' :
+                        'bg-white dark:bg-slate-800 border-l-4 border-blue-500'
+                      }`}>
+                        <CardContent className="p-6">
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-start gap-4">
+                              <div className={`p-3 rounded-full shrink-0 ${
+                                announcement.type === 'important' ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' :
+                                announcement.type === 'warning' ? 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                                'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+                              }`}>
+                                {announcement.type === 'important' ? <AlertCircle className="w-6 h-6" /> :
+                                 announcement.type === 'warning' ? <AlertCircle className="w-6 h-6" /> :
+                                 <Megaphone className="w-6 h-6" />}
+                              </div>
+                              <div>
+                                <h4 className="text-lg font-bold text-gray-900 dark:text-white">
+                                  {announcement.title}
+                                </h4>
+                                <p className="text-gray-600 dark:text-gray-300 mt-2 leading-relaxed">
+                                  {announcement.message}
+                                </p>
+                                <div className="flex items-center gap-4 mt-4 text-xs text-gray-500 dark:text-gray-400">
+                                  <div className="flex items-center gap-1">
+                                    <Clock className="w-3 h-3" />
+                                    {new Date(announcement.createdAt).toLocaleString()}
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <CheckCircle2 className="w-3 h-3" />
+                                    Posted by Admin
+                                  </div>
+                                </div>
                               </div>
                             </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDelete(announcement.id)}
+                              className="text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full p-2 h-auto"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
                           </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(announcement.id)}
-                            className="text-gray-400 hover:text-red-600 hover:bg-red-50"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))}
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
               </div>
             )}
           </div>

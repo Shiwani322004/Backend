@@ -63,7 +63,7 @@ export default function Sidebar({ userType }: SidebarProps) {
       {/* Mobile Menu Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white dark:bg-slate-800 rounded-lg shadow-md"
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-xl shadow-lg border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-200"
       >
         {isOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
@@ -73,56 +73,76 @@ export default function Sidebar({ userType }: SidebarProps) {
         initial={{ x: -300 }}
         animate={{ x: isOpen ? 0 : -300 }}
         className={cn(
-          "fixed top-0 left-0 z-40 h-screen w-64 bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-slate-800 transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static",
+          "fixed top-0 left-0 z-40 h-screen w-72 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-r border-gray-200/50 dark:border-slate-700/50 transition-all duration-300 ease-in-out lg:translate-x-0 lg:static shadow-2xl lg:shadow-none",
           !isOpen && "lg:hidden"
         )}
       >
         <div className="h-full flex flex-col">
           {/* Logo */}
-          <div className="p-6 border-b border-gray-200 dark:border-slate-800">
-            <h1 className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-              SMS Portal
-            </h1>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              {userType === 'admin' ? 'Administrator' : 'Student Portal'}
-            </p>
+          <div className="p-8 border-b border-gray-200/50 dark:border-slate-700/50">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                <GraduationCap className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300">
+                  SMS Portal
+                </h1>
+                <p className="text-xs font-medium text-blue-600 dark:text-blue-400">
+                  {userType === 'admin' ? 'Administrator' : 'Student Portal'}
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 overflow-y-auto py-4">
-            <ul className="space-y-1 px-3">
-              {links.map((link) => {
-                const Icon = link.icon;
-                const isActive = pathname === link.href;
-                
-                return (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className={cn(
-                        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                        isActive
-                          ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
-                          : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800"
-                      )}
-                    >
-                      <Icon size={20} />
-                      {link.label}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
+          <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+            {links.map((link) => {
+              const Icon = link.icon;
+              const isActive = pathname === link.href;
+              
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="block"
+                >
+                  <div className={cn(
+                    "relative flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 group",
+                    isActive
+                      ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 shadow-sm"
+                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-800/50 hover:text-gray-900 dark:hover:text-gray-200"
+                  )}>
+                    {isActive && (
+                      <motion.div
+                        layoutId="activeTab"
+                        className="absolute inset-0 bg-blue-50 dark:bg-blue-900/20 rounded-xl"
+                        initial={false}
+                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                      />
+                    )}
+                    <Icon size={20} className={cn("relative z-10", isActive && "text-blue-600 dark:text-blue-400")} />
+                    <span className="relative z-10">{link.label}</span>
+                    
+                    {isActive && (
+                      <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400" />
+                    )}
+                  </div>
+                </Link>
+              );
+            })}
           </nav>
 
           {/* Footer */}
-          <div className="p-4 border-t border-gray-200 dark:border-slate-800">
+          <div className="p-4 border-t border-gray-200/50 dark:border-slate-700/50 bg-gray-50/50 dark:bg-slate-900/50">
             <button
               onClick={handleLogout}
-              className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+              className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 group"
             >
-              <LogOut size={20} />
-              Sign Out
+              <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg group-hover:bg-red-200 dark:group-hover:bg-red-900/50 transition-colors">
+                <LogOut size={18} />
+              </div>
+              <span>Sign Out</span>
             </button>
           </div>
         </div>
